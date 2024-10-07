@@ -41,6 +41,10 @@ async def log_user_info(update: Update,
 async def check_membership(update: Update,
                            context: ContextTypes.DEFAULT_TYPE) -> None:
     """Ensure the user is a member of the required channel."""
+    if update.effective_user is None:
+        logger.error("No effective user found in the update.")
+        return
+
     user_id = update.effective_user.id
     try:
         member_status = await context.bot.get_chat_member(REQUIRED_CHANNEL, user_id)
