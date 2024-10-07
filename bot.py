@@ -8,6 +8,7 @@ from telegram.ext import (Application, CallbackQueryHandler,
                           ContextTypes, MessageHandler, filters)
 
 # Assuming these are defined in admin/__init__.py
+from admin.panel import admin_panel  # Import the admin panel
 from admin import admin_panel, ADMIN_USER_IDS
 
 # --- Bot Token ---
