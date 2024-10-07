@@ -14,7 +14,7 @@ TOKEN = "7734029404:AAGjciB3zvBfxMP8XpePT3-mRQLsPAkCY74"  # Your bot token
 
 # --- Other settings ---
 REQUIRED_CHANNEL = "@igdealsbykashif"  # Replace with your channel username
-ADMIN_USER_ID = 123456789  # Replace with the actual admin user ID
+ADMIN_USER_ID = 5463285002  # Replace with the actual admin user ID
 
 # --- Enable logging ---
 logging.basicConfig(
