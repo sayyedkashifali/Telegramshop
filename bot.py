@@ -1,11 +1,14 @@
 import telegram
 import secrets
+from threading import Thread
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
-from telegram.ext import Application, CommandHandler, MessageHandler, filters, ChatMemberHandler, CallbackQueryHandler
+from telegram.ext import Application, MessageHandler, filters, ChatMemberHandler, CallbackQueryHandler
+from flask import Flask
 
-# Your bot's API token
+# --- Bot Token ---
 TOKEN = "7734029404:AAGjciB3zvBfxMP8XpePT3-mRQLsPAkCY74"  # Replace with your actual bot token
 
+# --- Other settings ---
 REQUIRED_CHANNEL = "@igdealsbykashif"  # Replace with your channel username
 ADMIN_USER_ID = 123456789  # Replace with the actual admin user ID
 
@@ -129,12 +132,21 @@ def store_referral_code(user_id, referral_code):
     # Replace with your database logic to store the referral code
     pass
 
-# --- Handlers ---
-application = Application.builder().token(TOKEN).build()
+# --- Flask app for health checks ---
+app = Flask(__name__)
 
-application.add_handler(MessageHandler(filters.ALL, check_membership))
-# application.add_handler(CommandHandler("start", start))  # No need for separate start handler
-application.add_handler(CallbackQueryHandler(button_press))
-# ... (add other handlers)
+@app.route("/")
+def home():
+    return "Hello from Telegram Bot!"
 
-application.run_polling()
+if __name__ == "__main__":
+    flask_thread = Thread(target=app.run, kwargs={'host': '0.0.0.0', 'port': 8080})
+    flask_thread.start()
+
+    # --- Telegram bot ---
+    application = Application.builder().token(TOKEN).build()
+    application.add_handler(MessageHandler(filters.ALL, check_membership))
+    application.add_handler(CallbackQueryHandler(button_press))
+    # ... (add other handlers)
+    application.run_polling()
+        
