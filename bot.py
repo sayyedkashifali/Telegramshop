@@ -2,9 +2,9 @@ import telegram
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, ChatMemberHandler
 
 # Your bot's API token
-TOKEN = "YOUR_BOT_TOKEN"  # Replace with your actual bot token
+TOKEN = "7734029404:AAGjciB3zvBfxMP8XpePT3-mRQLsPAkCY74"  # Replace with your actual bot token
 
-REQUIRED_CHANNEL = "@your_channel_username"  # Replace with your channel username
+REQUIRED_CHANNEL = "@igdealsbykashif"  # Replace with your channel username
 
 # --- Forced subscription ---
 def check_membership(update, context):
