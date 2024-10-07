@@ -7,18 +7,22 @@ from telegram.ext import (Application, CallbackQueryHandler,
                           ChatMemberHandler, CommandHandler,
                           ContextTypes, MessageHandler, filters)
 
-# Assuming these are defined in admin/__init__.py
-from admin.panel import admin_panel  # Import the admin panel
-from admin import admin_panel, ADMIN_USER_IDS
+# Import the admin panel and admin user IDs from the correct module
+from admin.panel import admin_panel, ADMIN_USER_IDS
 
 # --- Bot Token ---
 TOKEN = "7734029404:AAGjciB3zvBfxMP8XpePT3-mRQLsPAkCY74"  # Replace with your actual bot token
 
 # --- Other settings ---
 REQUIRED_CHANNEL = "@igdealsbykashif"  # Replace with your actual channel username
-LOG_CHANNEL_ID = "-1002079377752"  # Your log channel ID
+LOG_CHANNEL_ID = "-1002429063387"  # Your log channel ID
 
-# ... (logging setup remains the same)
+# Configure logging
+logging.basicConfig(
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    level=logging.INFO
+)
+logger = logging.getLogger(__name__)
 
 # --- Log user information ---
 async def log_user_info(update: Update,
@@ -30,14 +34,36 @@ async def log_user_info(update: Update,
         await context.bot.send_message(
             chat_id=LOG_CHANNEL_ID,
             text=f"User ID: {user_id}\n{message}")
-    except telegram.error.BadRequest as e:
+    except Exception as e:
         logger.error(f"Error logging user info: {e}")
 
 # --- Forced subscription ---
-# ... (check_membership function remains the same)
+async def check_membership(update: Update,
+                           context: ContextTypes.DEFAULT_TYPE) -> None:
+    """Ensure the user is a member of the required channel."""
+    user_id = update.effective_user.id
+    try:
+        member_status = await context.bot.get_chat_member(REQUIRED_CHANNEL, user_id)
+        if member_status.status == 'left':
+            await update.message.reply_text(
+                f"You must join {REQUIRED_CHANNEL} to use this bot."
+            )
+            return
+    except Exception as e:
+        logger.error(f"Error checking membership: {e}")
 
 # --- Main menu ---
-# ... (start function remains the same)
+async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """Display the main menu."""
+    keyboard = [
+        [InlineKeyboardButton("Profile", callback_data='profile')],
+        [InlineKeyboardButton("Free Shop", callback_data='free_shop')],
+        [InlineKeyboardButton("Paid Shop", callback_data='paid_shop')],
+        [InlineKeyboardButton("Referral", callback_data='referral')],
+        [InlineKeyboardButton("Admin", callback_data='admin')]
+    ]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    await update.message.reply_text("Welcome to the Bot!", reply_markup=reply_markup)
 
 # --- Button press handler ---
 async def button_press(update: Update,
@@ -58,7 +84,14 @@ async def button_press(update: Update,
         await admin_panel(update, context)  # Call the admin function
 
 # --- Profile function ---
-# ... (profile function remains the same)
+async def profile(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """Display the user's profile information."""
+    user_id = update.effective_user.id
+    user_data = get_user_data(user_id)
+    profile_info = (f"Transactions: {user_data['transactions']}\n"
+                    f"Referral Points: {user_data['referral_points']}\n"
+                    f"INR Balance: {user_data['inr_balance']}")
+    await update.callback_query.message.reply_text(profile_info)
 
 # --- Free shop function ---
 async def free_shop(update: Update,
@@ -100,16 +133,24 @@ def get_user_data(user_id):
     }
 
 # --- Flask app for health checks ---
-# ... (Flask app code remains the same)
+from flask import Flask, jsonify
+
+app = Flask(__name__)
+
+@app.route('/health')
+def health():
+    return jsonify(status='ok')
 
 if __name__ == "__main__":
-    # ... (Flask thread remains the same)
+    # Start the Flask app in a separate thread
+    flask_thread = Thread(target=app.run, kwargs={'port': 5000})
+    flask_thread.start()
 
     # --- Telegram bot ---
     application = Application.builder().token(TOKEN).build()
     application.add_handler(MessageHandler(filters.ALL, check_membership))
     application.add_handler(CallbackQueryHandler(button_press))
     application.add_handler(CommandHandler("admin", admin_panel))
-    # ... (add other handlers)
+    # Add other handlers if needed
+    application.add_handler(CommandHandler("start", start))
     application.run_polling()
-                        
