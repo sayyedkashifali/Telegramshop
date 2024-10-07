@@ -3,18 +3,18 @@ import secrets
 from threading import Thread
 
 from flask import Flask
-from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
+from telegram import (InlineKeyboardButton, InlineKeyboardMarkup, Update)
 from telegram.constants import ParseMode
 from telegram.ext import (Application, CallbackQueryHandler,
-                          ChatMemberHandler, ContextTypes, MessageHandler,
-                          filters)
+                          ChatMemberHandler, CommandHandler,
+                          ContextTypes, MessageHandler, filters)
 
 # --- Bot Token ---
 TOKEN = "7734029404:AAGjciB3zvBfxMP8XpePT3-mRQLsPAkCY74"  # Your bot token
 
 # --- Other settings ---
 REQUIRED_CHANNEL = "@igdealsbykashif"  # Replace with your channel username
-ADMIN_USER_ID = 5463285002  # Replace with the actual admin user ID
+ADMIN_USER_IDS = [5463285002, 987654321]  # Replace with the actual admin user IDs
 
 # --- Enable logging ---
 logging.basicConfig(
@@ -130,13 +130,30 @@ async def referral(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
 # --- Admin panel ---
 async def admin(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    """Display the admin panel (only for the admin user)."""
+    """Display the admin panel (only for admin users)."""
     user_id = update.effective_user.id
-    if user_id == ADMIN_USER_ID:  # Replace with the actual admin user ID
+    if user_id in ADMIN_USER_IDS:  # Check if the user is an admin
         # Display admin panel options (e.g., list users, set points, broadcast)
         await update.callback_query.message.reply_text("Welcome to the admin panel!")
+        # ... (Implement admin functionalities)
     else:
         await update.callback_query.message.reply_text("You do not have access to the admin panel.")
+
+# --- Admin command to change user balance ---
+async def set_balance(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """Allow admins to set the INR balance of a user."""
+    user_id = update.effective_user.id
+    if user_id in ADMIN_USER_IDS:
+        try:
+            target_user_id = int(context.args[0])
+            new_balance = float(context.args[1])
+            # Update the user's balance in the database (replace with your database logic)
+            set_user_balance(target_user_id, new_balance)
+            await update.message.reply_text(f"User {target_user_id}'s balance set to {new_balance} INR.")
+        except (IndexError, ValueError):
+            await update.message.reply_text("Usage: /set_balance <user_id> <new_balance>")
+    else:
+        await update.message.reply_text("You do not have permission to use this command.")
 
 # --- Placeholder functions for database interaction ---
 def get_user_data(user_id):
@@ -146,32 +163,7 @@ def get_user_data(user_id):
     return {
         'transactions': 5,
         'referral_points': 100,
-        'inr_balance': 50.0
+        'inr_balance': 0.0  # New users start with 0 INR balance
     }
 
-def store_referral_code(user_id, referral_code):
-    """Store the referral code in the database (placeholder)."""
-    # Replace with your database logic to store the referral code
-    pass
-
-# --- Flask app for health checks ---
-app = Flask(__name__)
-
-@app.route("/")
-def home():
-    return "Hello from Telegram Bot!"
-
-def run_flask_app():
-    app.run(host='0.0.0.0', port=8080)
-
-if __name__ == "__main__":
-    flask_thread = Thread(target=run_flask_app)
-    flask_thread.start()
-
-    # --- Telegram bot ---
-    application = Application.builder().token(TOKEN).build()
-    application.add_handler(MessageHandler(filters.ALL, check_membership))
-    application.add_handler(CallbackQueryHandler(button_press))
-    # ... (add other handlers)
-    application.run_polling()
-    
+def store_referral_code(user_id, referral_
