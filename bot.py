@@ -1,5 +1,5 @@
 import telegram
-from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, ChatMemberHandler
+from telegram.ext import Updater, CommandHandler, MessageHandler, filters, ChatMemberHandler
 
 # Your bot's API token
 TOKEN = "7734029404:AAGjciB3zvBfxMP8XpePT3-mRQLsPAkCY74"  # Replace with your actual bot token
@@ -17,13 +17,13 @@ def check_membership(update, context):
             # ... (show main menu)
         else:
             # User is not a member, prompt them to join
-            context.bot.send_message(chat_id=update.effective_chat.id, 
+            context.bot.send_message(chat_id=update.effective_chat.id,
                                      text=f"Please join our channel first: {REQUIRED_CHANNEL}\n"
                                           "Then, start the bot again.")
     except telegram.error.BadRequest as e:
         if str(e) == "User not found":
             # User has not started the channel yet
-            context.bot.send_message(chat_id=update.effective_chat.id, 
+            context.bot.send_message(chat_id=update.effective_chat.id,
                                      text=f"Please join our channel first: {REQUIRED_CHANNEL}\n"
                                           "Then, start the bot again.")
         else:
@@ -42,7 +42,8 @@ def start(update, context):
 updater = Updater(TOKEN, use_context=True)
 dispatcher = updater.dispatcher
 
-dispatcher.add_handler(MessageHandler(Filters.all, check_membership))
+# Updated filter usage
+dispatcher.add_handler(MessageHandler(filters.ALL, check_membership))  
 dispatcher.add_handler(CommandHandler("start", start))
 # ... (add other handlers)
 
