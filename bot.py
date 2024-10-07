@@ -1,5 +1,5 @@
 import telegram
-import secrets  # For generating referral codes
+import secrets
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import Application, CommandHandler, MessageHandler, filters, ChatMemberHandler, CallbackQueryHandler
 
@@ -7,7 +7,7 @@ from telegram.ext import Application, CommandHandler, MessageHandler, filters, C
 TOKEN = "7734029404:AAGjciB3zvBfxMP8XpePT3-mRQLsPAkCY74"  # Replace with your actual bot token
 
 REQUIRED_CHANNEL = "@igdealsbykashif"  # Replace with your channel username
-ADMIN_USER_ID = 5463285002  # Replace with the actual admin user ID
+ADMIN_USER_ID = 123456789  # Replace with the actual admin user ID
 
 # --- Forced subscription ---
 def check_membership(update, context):
@@ -17,7 +17,7 @@ def check_membership(update, context):
         if chat_member.status in ['member', 'creator', 'administrator']:
             # User is a member, proceed with bot functionality
             update.message.reply_text("Welcome! You can now use the bot.")
-            # ... (show main menu)
+            start(update, context)  # Show the main menu
         else:
             # User is not a member, prompt them to join
             update.message.reply_text(
@@ -130,11 +130,10 @@ def store_referral_code(user_id, referral_code):
     pass
 
 # --- Handlers ---
-# Use Application instead of Updater
 application = Application.builder().token(TOKEN).build()
 
 application.add_handler(MessageHandler(filters.ALL, check_membership))
-application.add_handler(CommandHandler("start", start))
+# application.add_handler(CommandHandler("start", start))  # No need for separate start handler
 application.add_handler(CallbackQueryHandler(button_press))
 # ... (add other handlers)
 
