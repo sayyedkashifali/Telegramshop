@@ -1,1 +1,3 @@
-touch admin/__init__.py
+# admin/__init__.py
+
+# This file is intentionally left empty to mark the directory as a Python package.
