@@ -1,6 +1,6 @@
 import logging
 from threading import Thread
-
+from telegram.ext import CallbackQueryHandler
 from flask import Flask, jsonify
 from telegram import Update
 from telegram.ext import (Application, CommandHandler, ContextTypes,
