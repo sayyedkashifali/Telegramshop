@@ -51,8 +51,7 @@ async def check_membership(update: Update,
         member_status = await context.bot.get_chat_member(REQUIRED_CHANNEL,
                                                           user_id)
         if member_status.status == "left":
-            await
-            update.message.reply_text(
+            await update.message.reply_text(
                 f"You must join {REQUIRED_CHANNEL} to use this bot.")
             return
     except Exception as e:
@@ -160,11 +159,20 @@ def get_user_data(user_id):
 
 
 # --- Flask app for health checks ---
+from flask import Flask, jsonify
 
-# ... (Flask app code remains the same)
+app = Flask(__name__)
+
+
+@app.route("/health")
+def health():
+    return jsonify(status="ok")
+
 
 if __name__ == "__main__":
-    # ... (Flask thread remains the same)
+    # Start the Flask app in a separate thread
+    flask_thread = Thread(target=app.run, kwargs={"host": '0.0.0.0', "port": 8080})
+    flask_thread.start()
 
     # --- Telegram bot ---
     application = Application.builder().token(TOKEN).build()
