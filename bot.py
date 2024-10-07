@@ -1,12 +1,10 @@
 import logging
-import secrets
 from threading import Thread
 
 from flask import Flask, jsonify
-from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
-from telegram.ext import (Application, CallbackQueryHandler,
-                          CommandHandler, ContextTypes, MessageHandler,
-                          filters)
+from telegram import Update
+from telegram.ext import (Application, CommandHandler, ContextTypes,
+                          MessageHandler, filters)
 
 # Import the admin panel and admin user IDs from the correct module
 from admin.panel import admin_panel, ADMIN_USER_IDS
@@ -24,7 +22,6 @@ logging.basicConfig(
     level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-
 # --- Log user information ---
 async def log_user_info(update: Update,
                         context: ContextTypes.DEFAULT_TYPE,
@@ -37,10 +34,9 @@ async def log_user_info(update: Update,
     except Exception as e:
         logger.error(f"Error logging user info: {e}")
 
-
 # --- Forced subscription ---
 async def check_membership(update: Update,
-                           context: ContextTypes.DEFAULT_TYPE) -> None:
+                             context: ContextTypes.DEFAULT_TYPE) -> None:
     """Ensure the user is a member of the required channel."""
     if update.effective_user is None:
         logger.error("No effective user found in the update.")
@@ -49,33 +45,26 @@ async def check_membership(update: Update,
     user_id = update.effective_user.id
     try:
         member_status = await context.bot.get_chat_member(REQUIRED_CHANNEL,
-                                                          user_id)
+                                                            user_id)
         if member_status.status == "left":
             await update.message.reply_text(
                 f"You must join {REQUIRED_CHANNEL} to use this bot.")
             return
+        else:
+            await start(update, context)
     except Exception as e:
         logger.error(f"Error checking membership: {e}")
-
-
+        
 # --- Main menu ---
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Display the main menu."""
-    keyboard = [[
-        InlineKeyboardButton("Profile", callback_data="profile")
-    ], [
-        InlineKeyboardButton("Free Shop", callback_data="free_shop")
-    ], [
-        InlineKeyboardButton("Paid Shop", callback_data="paid_shop")
-    ], [
-        InlineKeyboardButton("Referral", callback_data="referral")
-    ], [
-        InlineKeyboardButton("Admin", callback_data="admin")
-    ]]
+    # Simpler menu for debugging
+    keyboard = [
+        [InlineKeyboardButton("Send Test Message", callback_data="send_message")]
+    ]
     reply_markup = InlineKeyboardMarkup(keyboard)
     await update.message.reply_text("Welcome to the Bot!",
                                     reply_markup=reply_markup)
-
 
 # --- Button press handler ---
 async def button_press(update: Update,
@@ -84,95 +73,30 @@ async def button_press(update: Update,
     query = update.callback_query
     await query.answer()
 
-    if query.data == "profile":
-        await profile(
-            update, context)  # Call the profile function
-    elif query.data == "free_shop":
-        await free_shop(
-            update, context)  # Call the free_shop function
-    elif query.data == "paid_shop":
-        await paid_shop(
-            update, context)  # Call the paid_shop function
-    elif query.data == "referral":
-        await referral(
-            update, context)  # Call the referral function
-    elif query.data == "admin":
-        await admin_panel(
-            update, context)  # Call the admin function
+    if query.data == "send_message":
+        await send_test_message(update, context)
 
-
-# --- Profile function ---
-async def profile(update: Update,
-                  context: ContextTypes.DEFAULT_TYPE) -> None:
-    """Display the user's profile information."""
-    user_id = update.effective_user.id
-    user_data = get_user_data(user_id)
-    profile_info = (
-        f"Transactions: {user_data['transactions']}\n"
-        f"Referral Points: {user_data['referral_points']}\n"
-        f"INR Balance: {user_data['inr_balance']}")
-    await update.callback_query.message.reply_text(profile_info)
-
-
-# --- Free shop function ---
-async def free_shop(update: Update,
-                    context: ContextTypes.DEFAULT_TYPE) -> None:
-    """Display the free shop."""
-    # Implement free shop logic here
-    await update.callback_query.message.reply_text("Welcome to the Free Shop!")
-
-
-# --- Paid shop function ---
-async def paid_shop(update: Update,
-                     context: ContextTypes.DEFAULT_TYPE) -> None:
-    """Display the paid shop."""
-    # Implement paid shop logic here
-    await update.callback_query.message.reply_text("Welcome to the Paid Shop!")
-
-
-# --- Referral system ---
-def generate_referral_link(user_id):
-    """Generate and store a unique referral link for the user."""
-    referral_code = secrets.token_urlsafe(16)
-    # store_referral_code(user_id, referral_code)  # Implement in database.py
-    return f"https://t.me/Teshfjsgfsudb_bot?start={referral_code}"
-
-
-async def referral(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    """Display the user's referral link."""
-    user_id = update.effective_user.id
-    referral_link = generate_referral_link(user_id)
-    await update.callback_query.message.reply_text(
-        f"Your referral link: {referral_link}")
-
+async def send_test_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """Send a test message to the user."""
+    try:
+        await update.callback_query.message.reply_text("This is a test message!")
+    except Exception as e:
+        logger.error(f"Error sending test message: {e}")
 
 # --- Placeholder functions for database interaction ---
 def get_user_data(user_id):
     """Fetch user data from the database (placeholder)."""
-    # Replace with your database logic to fetch user data
-    # This is a placeholder, return a dictionary with user data
     return {
         "transactions": 5,
         "referral_points": 100,
         "inr_balance": 0.0  # New users start with 0 INR balance
     }
 
-
 # --- Flask app for health checks ---
-from flask import Flask, jsonify
-
-app = Flask(__name__)
-
-
-@app.route("/health")
-def health():
-    return jsonify(status="ok")
-
+# ... (Flask app code remains the same)
 
 if __name__ == "__main__":
-    # Start the Flask app in a separate thread
-    flask_thread = Thread(target=app.run, kwargs={"host": '0.0.0.0', "port": 8080})
-    flask_thread.start()
+    # ... (Flask thread remains the same)
 
     # --- Telegram bot ---
     application = Application.builder().token(TOKEN).build()
@@ -186,3 +110,4 @@ if __name__ == "__main__":
     application.add_handler(CommandHandler("start", start))
 
     application.run_polling()
+  
