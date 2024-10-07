@@ -1,45 +1,58 @@
-import telegram
+import logging
 import secrets
 from threading import Thread
-from telegram import InlineKeyboardButton, InlineKeyboardMarkup
-from telegram.ext import Application, MessageHandler, filters, ChatMemberHandler, CallbackQueryHandler
+
 from flask import Flask
+from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
+from telegram.constants import ParseMode
+from telegram.ext import (Application, CallbackQueryHandler,
+                          ChatMemberHandler, ContextTypes, MessageHandler,
+                          filters)
 
 # --- Bot Token ---
-TOKEN = "7734029404:AAGjciB3zvBfxMP8XpePT3-mRQLsPAkCY74"  # Replace with your actual bot token
+TOKEN = "7734029404:AAGjciB3zvBfxMP8XpePT3-mRQLsPAkCY74"  # Your bot token
 
 # --- Other settings ---
 REQUIRED_CHANNEL = "@igdealsbykashif"  # Replace with your channel username
 ADMIN_USER_ID = 123456789  # Replace with the actual admin user ID
 
+# --- Enable logging ---
+logging.basicConfig(
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+    level=logging.INFO
+)
+logger = logging.getLogger(__name__)
+
 # --- Forced subscription ---
-def check_membership(update, context):
+async def check_membership(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """Check if the user is a member of the required channel."""
     user_id = update.message.from_user.id
     try:
-        chat_member = context.bot.get_chat_member(chat_id=REQUIRED_CHANNEL, user_id=user_id)
+        chat_member = await context.bot.get_chat_member(chat_id=REQUIRED_CHANNEL, user_id=user_id)
         if chat_member.status in ['member', 'creator', 'administrator']:
             # User is a member, proceed with bot functionality
-            update.message.reply_text("Welcome! You can now use the bot.")
-            start(update, context)  # Show the main menu
+            await update.message.reply_text("Welcome! You can now use the bot.")
+            await start(update, context)  # Show the main menu
         else:
             # User is not a member, prompt them to join
-            update.message.reply_text(
+            await update.message.reply_text(
                 f"Please join our channel first: {REQUIRED_CHANNEL}\n"
                 "Then, start the bot again."
             )
     except telegram.error.BadRequest as e:
         if str(e) == "User not found":
             # User has not started the channel yet
-            update.message.reply_text(
+            await update.message.reply_text(
                 f"Please join our channel first: {REQUIRED_CHANNEL}\n"
                 "Then, start the bot again."
             )
         else:
             # Handle other potential errors
-            print(f"Error checking membership: {e}")
+            logger.error(f"Error checking membership: {e}")
 
 # --- Main menu ---
-async def start(update, context):
+async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """Display the main menu with buttons."""
     keyboard = [
         [
             InlineKeyboardButton("Profile", callback_data='profile'),
@@ -55,7 +68,8 @@ async def start(update, context):
     await update.message.reply_text('Please choose:', reply_markup=reply_markup)
 
 # --- Button press handler ---
-async def button_press(update, context):
+async def button_press(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """Handle button presses from the main menu."""
     query = update.callback_query
     await query.answer()
     
@@ -71,7 +85,8 @@ async def button_press(update, context):
         await admin(update, context)  # Call the admin function
 
 # --- Profile function ---
-async def profile(update, context):
+async def profile(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """Display the user's profile information."""
     user_id = update.effective_user.id
     # Fetch user data from database (replace with your database logic)
     user_data = get_user_data(user_id) 
@@ -87,30 +102,35 @@ async def profile(update, context):
     await update.callback_query.message.reply_text(text)
 
 # --- Free shop function ---
-async def free_shop(update, context):
+async def free_shop(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """Display the free shop."""
     # Implement free shop logic here
     await update.callback_query.message.reply_text("Welcome to the Free Shop!")
 
 # --- Paid shop function ---
-async def paid_shop(update, context):
+async def paid_shop(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """Display the paid shop."""
     # Implement paid shop logic here
     await update.callback_query.message.reply_text("Welcome to the Paid Shop!")
 
 # --- Referral system ---
 def generate_referral_link(user_id):
+    """Generate and store a unique referral link for the user."""
     # Generate a unique referral code (e.g., using secrets.token_urlsafe())
     referral_code = secrets.token_urlsafe(16)
     # Store the referral code in the database, linked to the user_id
     store_referral_code(user_id, referral_code)
     return f"https://t.me/your_bot?start={referral_code}"
 
-async def referral(update, context):
+async def referral(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """Display the user's referral link."""
     user_id = update.effective_user.id
     referral_link = generate_referral_link(user_id)
     await update.callback_query.message.reply_text(f"Your referral link: {referral_link}")
 
 # --- Admin panel ---
-async def admin(update, context):
+async def admin(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """Display the admin panel (only for the admin user)."""
     user_id = update.effective_user.id
     if user_id == ADMIN_USER_ID:  # Replace with the actual admin user ID
         # Display admin panel options (e.g., list users, set points, broadcast)
@@ -120,6 +140,7 @@ async def admin(update, context):
 
 # --- Placeholder functions for database interaction ---
 def get_user_data(user_id):
+    """Fetch user data from the database (placeholder)."""
     # Replace with your database logic to fetch user data
     # This is a placeholder, return a dictionary with user data
     return {
@@ -129,6 +150,7 @@ def get_user_data(user_id):
     }
 
 def store_referral_code(user_id, referral_code):
+    """Store the referral code in the database (placeholder)."""
     # Replace with your database logic to store the referral code
     pass
 
@@ -139,8 +161,11 @@ app = Flask(__name__)
 def home():
     return "Hello from Telegram Bot!"
 
+def run_flask_app():
+    app.run(host='0.0.0.0', port=8080)
+
 if __name__ == "__main__":
-    flask_thread = Thread(target=app.run, kwargs={'host': '0.0.0.0', 'port': 8080})
+    flask_thread = Thread(target=run_flask_app)
     flask_thread.start()
 
     # --- Telegram bot ---
@@ -149,4 +174,4 @@ if __name__ == "__main__":
     application.add_handler(CallbackQueryHandler(button_press))
     # ... (add other handlers)
     application.run_polling()
-        
+    
