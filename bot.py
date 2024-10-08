@@ -1,13 +1,20 @@
 import logging
+import secrets
 from threading import Thread
-from telegram.ext import CallbackQueryHandler
+
 from flask import Flask, jsonify
-from telegram import Update
-from telegram.ext import (Application, CommandHandler, ContextTypes,
-                          MessageHandler, filters)
+from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
+from telegram.ext import (Application, CallbackQueryHandler,
+                          CommandHandler, ContextTypes, MessageHandler,
+                          filters)
 
 # Import the admin panel and admin user IDs from the correct module
 from admin.panel import admin_panel, ADMIN_USER_IDS
+
+# Import button handlers
+from button_handlers import (profile_handler, free_shop_handler, 
+                            paid_shop_handler, referral_handler, 
+                            admin_panel_handler, deposit_handler)
 
 # --- Bot Token ---
 TOKEN = "7734029404:AAGjciB3zvBfxMP8XpePT3-mRQLsPAkCY74"
@@ -22,75 +29,12 @@ logging.basicConfig(
     level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# --- Log user information ---
-async def log_user_info(update: Update,
-                        context: ContextTypes.DEFAULT_TYPE,
-                        user_id,
-                        message):
-    """Log user information to the log channel."""
-    try:
-        await context.bot.send_message(chat_id=LOG_CHANNEL_ID,
-                                       text=f"User ID: {user_id}\n{message}")
-    except Exception as e:
-        logger.error(f"Error logging user info: {e}")
+# ... (log_user_info, check_membership, start, button_press, profile, free_shop, paid_shop, referral functions remain the same)
 
-# --- Forced subscription ---
-async def check_membership(update: Update,
-                             context: ContextTypes.DEFAULT_TYPE) -> None:
-    """Ensure the user is a member of the required channel."""
-    if update.effective_user is None:
-        logger.error("No effective user found in the update.")
-        return
-
-    user_id = update.effective_user.id
-    try:
-        member_status = await context.bot.get_chat_member(REQUIRED_CHANNEL,
-                                                            user_id)
-        if member_status.status == "left":
-            await update.message.reply_text(
-                f"You must join {REQUIRED_CHANNEL} to use this bot.")
-            return
-        else:
-            await start(update, context)
-    except Exception as e:
-        logger.error(f"Error checking membership: {e}")
-        
-# --- Main menu ---
-async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    """Display the main menu."""
-    # Simpler menu for debugging
-    keyboard = [
-        [InlineKeyboardButton("Send Test Message", callback_data="send_message")]
-    ]
-    reply_markup = InlineKeyboardMarkup(keyboard)
-    await update.message.reply_text("Welcome to the Bot!",
-                                    reply_markup=reply_markup)
-
-# --- Button press handler ---
-async def button_press(update: Update,
-                      context: ContextTypes.DEFAULT_TYPE) -> None:
-    """Handle button presses from the main menu."""
-    query = update.callback_query
-    await query.answer()
-
-    if query.data == "send_message":
-        await send_test_message(update, context)
-
-async def send_test_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    """Send a test message to the user."""
-    try:
-        await update.callback_query.message.reply_text("This is a test message!")
-    except Exception as e:
-        logger.error(f"Error sending test message: {e}")
-
-# --- Placeholder functions for database interaction ---
-def get_user_data(user_id):
-    """Fetch user data from the database (placeholder)."""
-    return {
-        "transactions": 5,
-        "referral_points": 100,
-        "inr_balance": 0.0  # New users start with 0 INR balance
-    }
+# --- Error handler ---
+async def error_handler(update: object, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """Log the error and send a message to the developer."""
+    logger.error(msg="Exception while handling an update:", exc_info=context.error)
 
 # --- Flask app for health checks ---
 # ... (Flask app code remains the same)
@@ -103,11 +47,19 @@ if __name__ == "__main__":
 
     # --- Add handlers ---
     application.add_handler(MessageHandler(filters.ALL, check_membership))
-    application.add_handler(CallbackQueryHandler(button_press))
+    # application.add_handler(CallbackQueryHandler(button_press))  # Remove this if it's not needed
     application.add_handler(CommandHandler("admin", admin_panel))
+    application.add_error_handler(error_handler)  # Add the error handler
 
     # Add other handlers if needed
     application.add_handler(CommandHandler("start", start))
 
+    # Add button handlers
+    application.add_handler(CallbackQueryHandler(profile_handler, pattern='profile'))
+    application.add_handler(CallbackQueryHandler(free_shop_handler, pattern='free_shop'))
+    application.add_handler(CallbackQueryHandler(paid_shop_handler, pattern='paid_shop'))
+    application.add_handler(CallbackQueryHandler(referral_handler, pattern='referral'))
+    application.add_handler(CallbackQueryHandler(admin_panel_handler, pattern='admin'))
+    application.add_handler(CallbackQueryHandler(deposit_handler, pattern='deposit'))
+
     application.run_polling()
-  
