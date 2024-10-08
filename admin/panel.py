@@ -81,6 +81,7 @@ async def back_to_admin_menu(update: Update, context: ContextTypes.DEFAULT_TYPE)
 
 async def back_to_main_menu(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     """Handle the 'Back' button to return to the main menu."""
+    from bot import start  # Import start function from bot.py
     await start(update, context)  # Call the start function to display the main menu
     return ConversationHandler.END
 
