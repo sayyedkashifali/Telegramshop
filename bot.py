@@ -11,7 +11,7 @@ from telegram.ext import (Application, CallbackQueryHandler,
 from flask import Flask, request
 
 # Import the admin panel and admin user IDs from the correct module
-from admin.panel import admin_panel, ADMIN_USER_IDS, start
+from admin.panel import admin_panel, ADMIN_USER_IDS
 
 # Import shop handlers
 from free_shop import free_shop_handler
