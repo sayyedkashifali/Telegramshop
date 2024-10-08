@@ -79,17 +79,129 @@ async def check_membership(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 # --- Start Function ---
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """Handles the /start command."""
     logger.debug("Entering start handler")
-    # ... (rest of your start function)
+    user = update.effective_user
+    current_hour = datetime.now().hour
+    greeting = ""
 
-# ... (rest of your bot.py code with similar logging added to other handlers)
+    if 5 <= current_hour < 12:
+        greeting = "Good morning 🌞"
+    elif 12 <= current_hour < 18:
+        greeting = "Good afternoon ☀️"
+    else:
+        greeting = "Good evening 🌃"
 
-if __name__ == "__main__":
-    # --- Telegram bot ---
-    application = Application.builder().token(TOKEN).build()
+    message = f"""
+    {greeting} Hey! {user.mention_html()}
 
-    # --- Add handlers ---
-    # ...
+    This is **Flexer Premium Shop**, an advanced selling bot designed to provide you with a seamless and secure shopping experience. 
 
-    # --- Set webhook ---
-    
+    Explore our wide selection of products, easily manage your orders, and track your purchases with just a few taps. 
+    We are committed to providing you with the best possible service and ensuring your satisfaction. 
+
+    Happy shopping! 😊
+    """
+
+    keyboard = [[
+        InlineKeyboardButton("Profile", callback_data='profile'),
+        InlineKeyboardButton("Free Shop", callback_data='free_shop')
+    ], [
+        InlineKeyboardButton("Paid Shop", callback_data='paid_shop'),
+        InlineKeyboardButton("Referral System", callback_data='referral')
+    ],
+                [
+                    InlineKeyboardButton("Admin Panel", callback_data='admin'),
+                    InlineKeyboardButton("Deposit", callback_data='deposit')
+                ]]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    await update.message.reply_text(message,
+                                    reply_markup=reply_markup,
+                                    parse_mode="HTML")
+
+
+# --- Button Handlers ---
+async def profile_handler(update: Update,
+                          context: ContextTypes.DEFAULT_TYPE) -> None:
+    """Handles the 'Profile' button."""
+    logger.debug("Entering profile_handler")
+    user_id = update.effective_user.id
+    # You need to implement logic to fetch user details from a database
+    username = "test_user"
+    transaction_count = 5
+    referral_count = 2
+
+    message = f"""
+    *User ID:* {user_id}
+    *Username:* {username}
+    *Transactions:* {transaction_count}
+    *Referrals:* {referral_count}
+    """
+    await update.callback_query.message.edit_text(text=message,
+                                                parse_mode='Markdown')
+
+
+async def referral_handler(update: Update,
+                            context: ContextTypes.DEFAULT_TYPE) -> None:
+    """Handles the 'Referral System' button."""
+    logger.debug("Entering referral_handler")
+    user_id = update.effective_user.id
+    referral_link = f"https://t.me/your_bot?start={user_id}"  # Replace with your actual bot username
+    message = f"Share this link to invite others: {referral_link}"
+    await update.callback_query.message.edit_text(text=message)
+
+
+async def admin_panel_handler(update: Update,
+                              context: ContextTypes.DEFAULT_TYPE) -> None:
+    """Handles the 'Admin Panel' button."""
+    logger.debug("Entering admin_panel_handler")
+    await admin_panel(update, context)
+
+
+async def deposit_handler(update: Update,
+                          context: ContextTypes.DEFAULT_TYPE) -> None:
+    """Handles the 'Deposit' button."""
+    logger.debug("Entering deposit_handler")
+    with open('qr_code.png', 'rb') as qr_code_file:
+        await context.bot.send_photo(
+            chat_id=update.effective_chat.id,
+            photo=qr_code_file,
+            caption=
+            "Pay This QR (PayTM) and click Paid button For Go To Next step.\nOr\nYou Can 📞 contact Our Admin And topup Your account."
+        )
+
+    # Create the "Paid" and "Admin" buttons
+    keyboard = [[
+        InlineKeyboardButton("Paid", callback_data='paid'),
+        InlineKeyboardButton("Admin", url='https://t.me/your_admin_username')
+    ]]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    await update.effective_message.reply_text(
+        "If You paid, Send us a screenshot.\n\nNote :-\nIf You send Fake proofs You will be permanently banned.",
+        reply_markup=reply_markup)
+
+
+# --- Error handler ---
+async def error_handler(update: object,
+                        context: ContextTypes.DEFAULT_TYPE) -> None:
+    """Log the error and send a message to the developer."""
+    logger.exception(msg="Exception while handling an update:",
+                 exc_info=context.error)
+
+
+# --- Flask routes ---
+@app.route('/' + TOKEN, methods=['POST'])
+async def webhook():
+    """Webhook route for Telegram updates."""
+    logger.debug("Webhook request received")
+    update = Update.de_json(request.get_json(force=True), application.bot)
+    await application.process_update(update)
+    return 'OK'
+
+@app.route('/')
+def index():
+    """Simple index route."""
+    return 'Hello, this is the Telegram bot!'
+
+
+if __name__ ==
