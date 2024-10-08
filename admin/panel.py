@@ -48,7 +48,32 @@ async def users_menu(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     await update.callback_query.message.edit_text("Users Menu:", reply_markup=reply_markup)
     return USERS_MENU
 
-# ... (Similarly implement referrals_menu, shop_menu, broadcast_menu)
+async def referrals_menu(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    """Display the referrals menu."""
+    keyboard = [
+        [InlineKeyboardButton("Back", callback_data='back_to_admin')]
+    ]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    await update.callback_query.message.edit_text("Referrals Menu:", reply_markup=reply_markup)
+    return REFERRALS_MENU
+
+async def shop_menu(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    """Display the shop menu."""
+    keyboard = [
+        [InlineKeyboardButton("Back", callback_data='back_to_admin')]
+    ]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    await update.callback_query.message.edit_text("Shop Menu:", reply_markup=reply_markup)
+    return SHOP_MENU
+
+async def broadcast_menu(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    """Display the broadcast menu."""
+    keyboard = [
+        [InlineKeyboardButton("Back", callback_data='back_to_admin')]
+    ]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    await update.callback_query.message.edit_text("Broadcast Menu:", reply_markup=reply_markup)
+    return BROADCAST_MENU
 
 async def back_to_admin_menu(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     """Handle the 'Back' button to return to the main admin menu."""
@@ -78,7 +103,12 @@ admin_panel_conv_handler = ConversationHandler(
         REFERRALS_MENU: [
             # ... (Add handlers for referrals menu options)
         ],
-        # ... (Add states for other menus)
+        SHOP_MENU: [
+            # ... (Add handlers for shop menu options)
+        ],
+        BROADCAST_MENU: [
+            # ... (Add handlers for broadcast menu options)
+        ]
     },
     fallbacks=[]  # You might want to add a fallback handler here
 )
