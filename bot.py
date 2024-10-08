@@ -34,17 +34,20 @@ logger = logging.getLogger(__name__)
 # --- Initialize Flask app ---
 app = Flask(__name__)
 
+
 # --- Check Membership ---
-async def check_membership(update: Update, context: ContextTypes.DEFAULT_TYPE):
+async def check_membership(update: Update,
+                            context: ContextTypes.DEFAULT_TYPE):
     """Checks if the user has joined the required channel."""
-    logger.debug("Entering check_membership handler") # Log function entry
+    logger.debug("Entering check_membership handler")  # Log function entry
     try:
         user = update.effective_user
-        chat_member = await context.bot.get_chat_member(chat_id=REQUIRED_CHANNEL,
-                                                       user_id=user.id)
+        chat_member = await context.bot.get_chat_member(
+            chat_id=REQUIRED_CHANNEL, user_id=user.id)
 
         if chat_member.status in [
-                ChatMember.MEMBER, ChatMember.CREATOR, ChatMember.ADMINISTRATOR
+                ChatMember.MEMBER, ChatMember.CREATOR,
+                ChatMember.ADMINISTRATOR
         ]:
             # User is a member, proceed with the bot's functionality
             logger.debug("User is a member")
@@ -74,11 +77,14 @@ async def check_membership(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 reply_markup=keyboard,
                 parse_mode="HTML")
     except Exception as e:
-        logger.exception(f"An error occurred in check_membership: {e}") # Log exceptions
+        logger.exception(
+            f"An error occurred in check_membership: {e}"
+        )  # Log exceptions
 
 
 # --- Start Function ---
-async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+async def start(update: Update,
+                context: ContextTypes.DEFAULT_TYPE) -> None:
     """Handles the /start command."""
     logger.debug("Entering start handler")
     user = update.effective_user
@@ -109,11 +115,10 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     ], [
         InlineKeyboardButton("Paid Shop", callback_data='paid_shop'),
         InlineKeyboardButton("Referral System", callback_data='referral')
-    ],
-                [
-                    InlineKeyboardButton("Admin Panel", callback_data='admin'),
-                    InlineKeyboardButton("Deposit", callback_data='deposit')
-                ]]
+    ], [
+        InlineKeyboardButton("Admin Panel", callback_data='admin'),
+        InlineKeyboardButton("Deposit", callback_data='deposit')
+    ]]
     reply_markup = InlineKeyboardMarkup(keyboard)
     await update.message.reply_text(message,
                                     reply_markup=reply_markup,
@@ -195,13 +200,4 @@ async def webhook():
     """Webhook route for Telegram updates."""
     logger.debug("Webhook request received")
     update = Update.de_json(request.get_json(force=True), application.bot)
-    await application.process_update(update)
-    return 'OK'
-
-@app.route('/')
-def index():
-    """Simple index route."""
-    return 'Hello, this is the Telegram bot!'
-
-
-if __name__ ==
+                  
