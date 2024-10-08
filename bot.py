@@ -8,6 +8,8 @@ from telegram.ext import (Application, CallbackQueryHandler,
                           CommandHandler, ContextTypes, MessageHandler,
                           filters)
 
+from flask import Flask, request
+
 # Import the admin panel and admin user IDs from the correct module
 from admin.panel import admin_panel, ADMIN_USER_IDS
 
@@ -28,6 +30,8 @@ logging.basicConfig(
     level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+# --- Initialize Flask app ---
+app = Flask(__name__)
 
 # --- Check Membership ---
 async def check_membership(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -173,6 +177,20 @@ async def error_handler(update: object,
                  exc_info=context.error)
 
 
+# --- Flask routes ---
+@app.route('/' + TOKEN, methods=['POST'])
+async def webhook():
+    """Webhook route for Telegram updates."""
+    update = Update.de_json(request.get_json(force=True), application.bot)
+    await application.process_update(update)
+    return 'OK'
+
+@app.route('/')
+def index():
+    """Simple index route."""
+    return 'Hello, this is the Telegram bot!'
+
+
 if __name__ == "__main__":
     # --- Telegram bot ---
     application = Application.builder().token(TOKEN).build()
@@ -182,13 +200,5 @@ if __name__ == "__main__":
     application.add_handler(CommandHandler("admin", admin_panel))
     application.add_handler(CallbackQueryHandler(profile_handler, pattern="profile"))
     application.add_handler(CallbackQueryHandler(free_shop_handler, pattern="free_shop"))  # Connect the handler
-    application.add_handler(CallbackQueryHandler(paid_shop_handler, pattern="paid_shop"))  # Connect the handler
-    application.add_handler(CallbackQueryHandler(referral_handler, pattern="referral"))
-    application.add_handler(CallbackQueryHandler(admin_panel_handler, pattern="admin"))
-    application.add_handler(CallbackQueryHandler(deposit_handler, pattern="deposit"))
-    
-    application.add_error_handler(error_handler)
-
-    # Start the bot
-    application.run_polling()
+    application
   
