@@ -1,6 +1,3 @@
-The warning indicates that `per_message=False` in your `CallbackQueryHandler` might cause it to not be tracked for every message. Here is the updated `admin/panel.py` with `per_message=True` set for each `CallbackQueryHandler`:
-
-```python
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import ContextTypes, ConversationHandler, CallbackQueryHandler, CommandHandler
 
@@ -126,6 +123,3 @@ admin_panel_conv_handler = ConversationHandler(
     },
     fallbacks=[]  # You might want to add a fallback handler here
 )
-```
-
-Please replace the content of `admin/panel.py` with the above code. This should resolve the warnings.
