@@ -11,8 +11,12 @@ from telegram.ext import (Application, CallbackQueryHandler,
 # Import the admin panel and admin user IDs from the correct module
 from admin.panel import admin_panel, ADMIN_USER_IDS
 
+# Import shop handlers
+from free_shop import free_shop_handler
+from paid_shop import paid_shop_handler
+
 # --- Bot Token ---
-TOKEN = ""  # Replace with your actual bot token
+TOKEN = "8085073135:AAEpv0Vt56MPYpYAVmyjwmwUvGBcUFIzs6E"  # Your new bot token
 
 # --- Other settings ---
 REQUIRED_CHANNEL = "@igdealsbykashif"  # Your channel username
@@ -124,20 +128,6 @@ async def profile_handler(update: Update,
                                                 parse_mode='Markdown')
 
 
-async def free_shop_handler(update: Update,
-                            context: ContextTypes.DEFAULT_TYPE) -> None:
-    """Handles the 'Free Shop' button."""
-    # Logic for free shop items
-    await update.callback_query.message.edit_text(text="Free shop items listed here.")
-
-
-async def paid_shop_handler(update: Update,
-                            context: ContextTypes.DEFAULT_TYPE) -> None:
-    """Handles the 'Paid Shop' button."""
-    # Logic for paid shop items
-    await update.callback_query.message.edit_text(text="Paid shop items listed here.")
-
-
 async def referral_handler(update: Update,
                             context: ContextTypes.DEFAULT_TYPE) -> None:
     """Handles the 'Referral System' button."""
@@ -191,8 +181,8 @@ if __name__ == "__main__":
     application.add_handler(CommandHandler("start", check_membership))
     application.add_handler(CommandHandler("admin", admin_panel))
     application.add_handler(CallbackQueryHandler(profile_handler, pattern="profile"))
-    application.add_handler(CallbackQueryHandler(free_shop_handler, pattern="free_shop"))
-    application.add_handler(CallbackQueryHandler(paid_shop_handler, pattern="paid_shop"))
+    application.add_handler(CallbackQueryHandler(free_shop_handler, pattern="free_shop"))  # Connect the handler
+    application.add_handler(CallbackQueryHandler(paid_shop_handler, pattern="paid_shop"))  # Connect the handler
     application.add_handler(CallbackQueryHandler(referral_handler, pattern="referral"))
     application.add_handler(CallbackQueryHandler(admin_panel_handler, pattern="admin"))
     application.add_handler(CallbackQueryHandler(deposit_handler, pattern="deposit"))
@@ -201,3 +191,4 @@ if __name__ == "__main__":
 
     # Start the bot
     application.run_polling()
+  
