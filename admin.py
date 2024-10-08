@@ -82,4 +82,4 @@ admin_panel_handler = ConversationHandler(
         SHOP_MENU: [CallbackQueryHandler(admin_menu_handler)]  # Placeholder
     },
     fallbacks=[CommandHandler("admin", admin_panel)]
-        )
+)
