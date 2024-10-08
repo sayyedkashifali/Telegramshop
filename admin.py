@@ -4,13 +4,20 @@ from telegram.ext import ContextTypes, ConversationHandler, CallbackQueryHandler
 from admin.users import set_balance, list_users  # Import admin functions
 from admin.utils import broadcast
 
-# --- Admin Panel States ---
-ADMIN_MENU, USERS_MENU, REFERRALS_MENU, SHOP_MENU = range(4)
+# Updated admin IDs and states
+ADMIN_USER_IDS = [5881638979, 5463285002]
+ADMIN_MENU, USERS_MENU, REFERRALS_MENU, SHOP_MENU, BROADCAST_MENU = range(5)
 
 async def admin_panel(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     """Display the main admin panel menu."""
     user_id = update.effective_user.id
     if user_id in ADMIN_USER_IDS:
+        admin_id = update.effective_user.id
+        await context.bot.send_photo(
+            chat_id=update.effective_chat.id,
+            photo="https://files.catbox.moe/x79o1v.jpg",  # Replace with the actual photo URL
+            caption=f"Welcome to the Admin Panel, Admin {admin_id}!"
+        )
         keyboard = [
             [InlineKeyboardButton("Users", callback_data='users')],
             [InlineKeyboardButton("Referrals", callback_data='referrals')],
@@ -25,61 +32,89 @@ async def admin_panel(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int
         await update.message.reply_text("You do not have access to the admin panel.")
         return ConversationHandler.END
 
-async def admin_menu_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
-    """Handle button presses in the main admin menu."""
-    query = update.callback_query
-    await query.answer()
+async def users_menu(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    """Display the users menu."""
+    keyboard = [
+        [InlineKeyboardButton("View Users", callback_data='view_users')],
+        [InlineKeyboardButton("Edit User", callback_data='edit_user')],
+        [InlineKeyboardButton("Back", callback_data='back_to_admin')]
+    ]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    await update.callback_query.message.edit_text("Users Menu:", reply_markup=reply_markup)
+    return USERS_MENU
 
-    if query.data == 'users':
-        # Display users menu
-        keyboard = [
-            [InlineKeyboardButton("List Users", callback_data='list_users')],
-            [InlineKeyboardButton("Set Balance", callback_data='set_balance')],
-            [InlineKeyboardButton("Back", callback_data='back_to_admin')]
-        ]
-        reply_markup = InlineKeyboardMarkup(keyboard)
-        await query.edit_message_text("Users Menu:", reply_markup=reply_markup)
-        return USERS_MENU
-    elif query.data == 'referrals':
-        # Display referrals menu
-        await query.edit_message_text("Referrals Menu (Coming Soon)")
-        return REFERRALS_MENU
-    elif query.data == 'shop':
-        # Display shop menu
-        await query.edit_message_text("Shop Menu (Coming Soon)")
-        return SHOP_MENU
-    elif query.data == 'broadcast':
-        await broadcast(update, context)
-        return ADMIN_MENU
-    elif query.data == 'back':
-        await query.edit_message_text("Exiting admin panel.")
-        return ConversationHandler.END
+async def referrals_menu(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    """Display the referrals menu."""
+    keyboard = [
+        [InlineKeyboardButton("Back", callback_data='back_to_admin')]
+    ]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    await update.callback_query.message.edit_text("Referrals Menu:", reply_markup=reply_markup)
+    return REFERRALS_MENU
 
-async def users_menu_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
-    """Handle button presses in the users menu."""
-    query = update.callback_query
-    await query.answer()
+async def shop_menu(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    """Display the shop menu."""
+    keyboard = [
+        [InlineKeyboardButton("Back", callback_data='back_to_admin')]
+    ]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    await update.callback_query.message.edit_text("Shop Menu:", reply_markup=reply_markup)
+    return SHOP_MENU
 
-    if query.data == 'list_users':
-        await list_users(update, context)
-        return USERS_MENU
-    elif query.data == 'set_balance':
-        await query.edit_message_text("Enter user ID and new balance (e.g., `/set_balance 123456789 100`)")
-        return USERS_MENU
-    elif query.data == 'back_to_admin':
-        return await admin_panel(update, context)  # Go back to main admin menu
+async def broadcast_menu(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    """Display the broadcast menu."""
+    keyboard = [
+        [InlineKeyboardButton("Back", callback_data='back_to_admin')]
+    ]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    await update.callback_query.message.edit_text("Broadcast Menu:", reply_markup=reply_markup)
+    return BROADCAST_MENU
 
-# --- Admin Panel Conversation Handler ---
-admin_panel_handler = ConversationHandler(
+async def back_to_admin_menu(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    """Handle the 'Back' button to return to the main admin menu."""
+    return await admin_panel(update, context)
+
+async def back_to_main_menu(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    """Handle the 'Back' button to return to the main menu."""
+    from bot import start  # Import start function from bot.py
+    await start(update, context)  # Call the start function to display the main menu
+    return ConversationHandler.END
+
+async def view_users_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    """Handle the 'View Users' button."""
+    # Add your implementation here
+    pass
+
+async def edit_user_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    """Handle the 'Edit User' button."""
+    # Add your implementation here
+    pass
+
+# Create the conversation handler
+admin_panel_conv_handler = ConversationHandler(
     entry_points=[CommandHandler("admin", admin_panel)],
     states={
-        ADMIN_MENU: [CallbackQueryHandler(admin_menu_handler)],
-        USERS_MENU: [
-            CallbackQueryHandler(users_menu_handler),
-            CommandHandler("set_balance", set_balance)
+        ADMIN_MENU: [
+            CallbackQueryHandler(users_menu, pattern="users"),
+            CallbackQueryHandler(referrals_menu, pattern="referrals"),
+            CallbackQueryHandler(shop_menu, pattern="shop"),
+            CallbackQueryHandler(broadcast_menu, pattern="broadcast"),
+            CallbackQueryHandler(back_to_main_menu, pattern="back")
         ],
-        REFERRALS_MENU: [CallbackQueryHandler(admin_menu_handler)],  # Placeholder
-        SHOP_MENU: [CallbackQueryHandler(admin_menu_handler)]  # Placeholder
+        USERS_MENU: [
+            CallbackQueryHandler(view_users_handler, pattern="view_users"),
+            CallbackQueryHandler(edit_user_handler, pattern="edit_user"),
+            CallbackQueryHandler(back_to_admin_menu, pattern="back_to_admin")
+        ],
+        REFERRALS_MENU: [
+            # ... (Add handlers for referrals menu options)
+        ],
+        SHOP_MENU: [
+            # ... (Add handlers for shop menu options)
+        ],
+        BROADCAST_MENU: [
+            # ... (Add handlers for broadcast menu options)
+        ]
     },
-    fallbacks=[CommandHandler("admin", admin_panel)]
+    fallbacks=[]  # You might want to add a fallback handler here
 )
