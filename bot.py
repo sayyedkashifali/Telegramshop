@@ -190,4 +190,6 @@ async def view_users_handler(update: Update, context: ContextTypes.DEFAULT_TYPE)
     pass  # Add implementation
 
 
-async def edit_user_handler
+async def edit_user_handler():
+    # Placeholder for editing user functionality
+    pass
