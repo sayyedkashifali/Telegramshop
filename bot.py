@@ -193,5 +193,6 @@ if __name__ == "__main__":
     application = Application.builder().token(TOKEN).build()
 
     # --- Add handlers ---
-    application.add_handler(MessageHandler(filters
+    application.add_handler(MessageHandler(filters.ALL, check_membership)) 
+
     
