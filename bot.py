@@ -212,11 +212,20 @@ async def webhook():
 
 @app.route('/')
 def index():
-    return "Hello, World!"
+    return "Hello, World!💀"
+
+# ... other code in bot.py
 
 if __name__ == "__main__":
     try:
-        # Add the rest of your __main__ block here
-        app.run(host="0.0.0.0", port=8080, debug=True)
+        # ...
+
+        # --- Set webhook ---
+        application.run_webhook(
+            listen="0.0.0.0",
+            port=8080,
+            url_path=TOKEN,
+            webhook_url=f"https://final-hester-notcrazyhuman-94126448.koyeb.app/{TOKEN}"  # Updated webhook URL
+        )
     except Exception as e:
         logger.exception(f"An error occurred in __main__: {e}")
