@@ -186,8 +186,4 @@ async def error_handler(update: object, context: ContextTypes.DEFAULT_TYPE) -> N
 
 # --- Placeholder Handlers ---
 async def view_users_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    """Placeholder for viewing users."""
-    pass  # Add implementation
-
-
-async def edit_user_handler
+    """Placeholder
