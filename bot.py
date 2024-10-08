@@ -184,14 +184,10 @@ async def error_handler(update: object, context: ContextTypes.DEFAULT_TYPE) -> N
     logger.exception(msg="Exception while handling an update:", exc_info=context.error)
 
 
-# 
-
 # --- Placeholder Handlers ---
 async def view_users_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    """Placeholder for viewing users."""  # Corrected line: Closing triple quotes added
+    """Placeholder for viewing users."""
     pass  # Add implementation
 
-async def edit_user_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    pass  # Add implementation
 
-# ... rest of your bot.py code
+async def edit_user_handler
