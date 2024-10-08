@@ -26,8 +26,6 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 # --- Check Membership ---
-
-
 async def check_membership(update: Update,
                           context: ContextTypes.DEFAULT_TYPE):
     """Checks if the user has joined the required channel."""
