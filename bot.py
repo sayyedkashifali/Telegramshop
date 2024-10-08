@@ -198,4 +198,4 @@ if __name__ == "__main__":
     # ... (Flask thread remains the same)
 
     # --- Telegram bot ---
-    application = Application.builder().token(TOKEN
+    application = Application.builder().token(TOKEN).build()
