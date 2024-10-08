@@ -26,7 +26,7 @@ LOG_CHANNEL_ID = "-1002429063387"  # Your log channel ID
 
 # Configure logging
 logging.basicConfig(
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+    format="%(asctime)s - %(name)s - %(levellevelnamevel)s - %(message)s",
     level=logging.DEBUG)  # Set to DEBUG for more detailed logs
 logger = logging.getLogger(__name__)
 
@@ -217,6 +217,6 @@ def index():
 if __name__ == "__main__":
     try:
         # Add the rest of your __main__ block here
-        app.run(debug=True)
+        app.run(host="0.0.0.0", port=8080, debug=True)
     except Exception as e:
         logger.exception(f"An error occurred in __main__: {e}")
