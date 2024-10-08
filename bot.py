@@ -50,10 +50,7 @@ async def check_membership(update: Update, context: ContextTypes.DEFAULT_TYPE):
             "https://files.catbox.moe/ahpyvy.jpg",
             "https://files.catbox.moe/jrrfdu.jpg",
             "https://files.catbox.moe/m92opv.jpg",
-            "https://files.catbox.moe/dt641v.jpg",
-            "https://files.catbox.moe/b13ifn.jpg",
-            "https://files.catbox.moe/m92opv.jpg",
-            "https://files.catbox.moe/jrrfdu.jpg"
+            "https://files.catbox.moe/dt641v.jpg"
         ]
         # Choose a random image from the list
         random_image = random.choice(images)
@@ -112,7 +109,10 @@ async def profile_handler(update: Update,
                           context: ContextTypes.DEFAULT_TYPE) -> None:
     """Handles the 'Profile' button."""
     user_id = update.effective_user.id
-    # ... your database interaction logic to fetch username, transaction_count, referral_count ...
+    # You need to implement logic to fetch user details from a database
+    username = "test_user"
+    transaction_count = 5
+    referral_count = 2
 
     message = f"""
     *User ID:* {user_id}
@@ -127,25 +127,21 @@ async def profile_handler(update: Update,
 async def free_shop_handler(update: Update,
                             context: ContextTypes.DEFAULT_TYPE) -> None:
     """Handles the 'Free Shop' button."""
-    # Fetch and display items from the free shop
-    # ... your shop logic ...
-    pass  # Replace with your actual free shop code
+    # Logic for free shop items
+    await update.callback_query.message.edit_text(text="Free shop items listed here.")
 
 
 async def paid_shop_handler(update: Update,
                             context: ContextTypes.DEFAULT_TYPE) -> None:
     """Handles the 'Paid Shop' button."""
-    # Fetch and display items from the paid shop
-    # ... your shop logic ...
-    pass  # Replace with your actual paid shop code
+    # Logic for paid shop items
+    await update.callback_query.message.edit_text(text="Paid shop items listed here.")
 
 
 async def referral_handler(update: Update,
                             context: ContextTypes.DEFAULT_TYPE) -> None:
     """Handles the 'Referral System' button."""
     user_id = update.effective_user.id
-    # Generate or fetch the user's unique referral ID
-    # ... your referral logic ...
     referral_link = f"https://t.me/your_bot?start={user_id}"  # Replace with your actual bot username
     message = f"Share this link to invite others: {referral_link}"
     await update.callback_query.message.edit_text(text=message)
@@ -154,29 +150,28 @@ async def referral_handler(update: Update,
 async def admin_panel_handler(update: Update,
                               context: ContextTypes.DEFAULT_TYPE) -> None:
     """Handles the 'Admin Panel' button."""
-    # Redirect to the admin panel function
     await admin_panel(update, context)
 
 
 async def deposit_handler(update: Update,
                           context: ContextTypes.DEFAULT_TYPE) -> None:
     """Handles the 'Deposit' button."""
-    # Send the QR code image and instructions
-    await context.bot.send_photo(
-        chat_id=update.effective_chat.id,
-        photo=open('qr_code.png', 'rb'),  # Replace with the actual path to your QR code image
-        caption=
-        "Pay This QR (PayTM) and click Paid button For Go To Next step.\nOr\nYou Can 📞 contact Our Admin And topup Your account."
-    )
+    with open('qr_code.png', 'rb') as qr_code_file:
+        await context.bot.send_photo(
+            chat_id=update.effective_chat.id,
+            photo=qr_code_file,
+            caption=
+            "Pay This QR (PayTM) and click Paid button For Go To Next step.\nOr\nYou Can 📞 contact Our Admin And topup Your account."
+        )
+
     # Create the "Paid" and "Admin" buttons
     keyboard = [[
         InlineKeyboardButton("Paid", callback_data='paid'),
-        InlineKeyboardButton("Admin",
-                             url='https://t.me/your_admin_username')
-    ]]  # Replace with your admin's Telegram username
+        InlineKeyboardButton("Admin", url='https://t.me/your_admin_username')
+    ]]
     reply_markup = InlineKeyboardMarkup(keyboard)
     await update.effective_message.reply_text(
-        "Hey UNKNOWN.\nIf You paid Send us a screenshot.\n\nNote :-\nIf You send Fake proofs You got Permanently banned.",
+        "If You paid, Send us a screenshot.\n\nNote :-\nIf You send Fake proofs You will be permanently banned.",
         reply_markup=reply_markup)
 
 
@@ -193,9 +188,16 @@ if __name__ == "__main__":
     application = Application.builder().token(TOKEN).build()
 
     # --- Add handlers ---
-    application.add_handler(MessageHandler(filters.ALL, check_membership))
+    application.add_handler(CommandHandler("start", check_membership))
     application.add_handler(CommandHandler("admin", admin_panel))
+    application.add_handler(CallbackQueryHandler(profile_handler, pattern="profile"))
+    application.add_handler(CallbackQueryHandler(free_shop_handler, pattern="free_shop"))
+    application.add_handler(CallbackQueryHandler(paid_shop_handler, pattern="paid_shop"))
+    application.add_handler(CallbackQueryHandler(referral_handler, pattern="referral"))
+    application.add_handler(CallbackQueryHandler(admin_panel_handler, pattern="admin"))
+    application.add_handler(CallbackQueryHandler(deposit_handler, pattern="deposit"))
+    
     application.add_error_handler(error_handler)
 
-    # Add other handlers if needed
-    application.add_handler(CommandHandler
+    # Start the bot
+    application.run_polling()
