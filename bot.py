@@ -8,8 +8,6 @@ from telegram.ext import (Application, CallbackQueryHandler,
                           CommandHandler, ContextTypes, MessageHandler,
                           filters)
 
-from flask import Flask, request
-
 # Import the admin panel and admin user IDs from the correct module
 from admin.panel import admin_panel, ADMIN_USER_IDS
 
@@ -18,7 +16,7 @@ from free_shop import free_shop_handler
 from paid_shop import paid_shop_handler
 
 # --- Bot Token ---
-TOKEN = "8085073135:AAEpv0Vt56MPYpYAVmyjwmwUvGBcUFIzs6E"  # Replace with your bot token
+TOKEN = "8085073135:AAEpv0Vt56MPYpYAVmyjwmwUvGBcUFIzs6E"  # Your bot token
 
 # --- Other settings ---
 REQUIRED_CHANNEL = "@igdealsbykashif"  # Your channel username
@@ -26,16 +24,14 @@ LOG_CHANNEL_ID = "-1002429063387"  # Your log channel ID
 
 # Configure logging
 logging.basicConfig(
-    format="%(asctime)s - %(name)s - %(levellevelnamevel)s - %(message)s",
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
     level=logging.DEBUG)  # Set to DEBUG for more detailed logs
 logger = logging.getLogger(__name__)
 
-# --- Initialize Flask app ---
-app = Flask(__name__)
-
 
 # --- Check Membership ---
-async def check_membership(update: Update, context: ContextTypes.DEFAULT_TYPE):
+async def check_membership(update: Update,
+                            context: ContextTypes.DEFAULT_TYPE):
     """Checks if the user has joined the required channel."""
     logger.debug("Entering check_membership handler")  # Log function entry
     try:
@@ -70,60 +66,62 @@ async def check_membership(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
             await update.message.reply_photo(
                 photo=random_image,
-                caption=f"👋 Hey {user.mention_html()}!\n\nTo use this bot, you need to join our channel first. Click the button below to join and then press /start to start using the bot.",
+                caption=
+                f"👋 Hey {user.mention_html()}!\n\nTo use this bot, you need to join our channel first. Click the button below to join and then press /start to start using the bot.",
                 reply_markup=keyboard,
                 parse_mode="HTML")
     except Exception as e:
-        logger.exception(f"An error occurred in check_membership: {e}")
+        logger.exception(
+            f"An error occurred in check_membership: {e}"
+        )  # Log exceptions
 
 
 # --- Start Function ---
-async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+async def start(update: Update,
+                context: ContextTypes.DEFAULT_TYPE) -> None:
     """Handles the /start command."""
     logger.debug("Entering start handler")
-    try:
-        user = update.effective_user
-        current_hour = datetime.now().hour
-        greeting = ""
+    user = update.effective_user
+    current_hour = datetime.now().hour
+    greeting = ""
 
-        if 5 <= current_hour < 12:
-            greeting = "Good morning 🌞"
-        elif 12 <= current_hour < 18:
-            greeting = "Good afternoon ☀️"
-        else:
-            greeting = "Good evening 🌃"
+    if 5 <= current_hour < 12:
+        greeting = "Good morning 🌞"
+    elif 12 <= current_hour < 18:
+        greeting = "Good afternoon ☀️"
+    else:
+        greeting = "Good evening 🌃"
 
-        message = f"""
-        {greeting} Hey! {user.mention_html()}
+    message = f"""
+    {greeting} Hey! {user.mention_html()}
 
-        This is **Flexer Premium Shop**, an advanced selling bot designed to provide you with a seamless and secure shopping experience. 
+    This is **Flexer Premium Shop**, an advanced selling bot designed to provide you with a seamless and secure shopping experience. 
 
-        Explore our wide selection of products, easily manage your orders, and track your purchases with just a few taps. 
-        We are committed to providing you with the best possible service and ensuring your satisfaction. 
+    Explore our wide selection of products, easily manage your orders, and track your purchases with just a few taps. 
+    We are committed to providing you with the best possible service and ensuring your satisfaction. 
 
-        Happy shopping! 😊
-        """
+    Happy shopping! 😊
+    """
 
-        keyboard = [[
-            InlineKeyboardButton("Profile", callback_data='profile'),
-            InlineKeyboardButton("Free Shop", callback_data='free_shop')
-        ], [
-            InlineKeyboardButton("Paid Shop", callback_data='paid_shop'),
-            InlineKeyboardButton("Referral System", callback_data='referral')
-        ], [
-            InlineKeyboardButton("Admin Panel", callback_data='admin'),
-            InlineKeyboardButton("Deposit", callback_data='deposit')
-        ]]
-        reply_markup = InlineKeyboardMarkup(keyboard)
-        await update.message.reply_text(message,
-                                        reply_markup=reply_markup,
-                                        parse_mode="HTML")
-    except Exception as e:
-        logger.exception(f"An error occurred in start: {e}")
+    keyboard = [[
+        InlineKeyboardButton("Profile", callback_data='profile'),
+        InlineKeyboardButton("Free Shop", callback_data='free_shop')
+    ], [
+        InlineKeyboardButton("Paid Shop", callback_data='paid_shop'),
+        InlineKeyboardButton("Referral System", callback_data='referral')
+    ], [
+        InlineKeyboardButton("Admin Panel", callback_data='admin'),
+        InlineKeyboardButton("Deposit", callback_data='deposit')
+    ]]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    await update.message.reply_text(message,
+                                    reply_markup=reply_markup,
+                                    parse_mode="HTML")
 
 
 # --- Button Handlers ---
-async def profile_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+async def profile_handler(update: Update,
+                          context: ContextTypes.DEFAULT_TYPE) -> None:
     """Handles the 'Profile' button."""
     logger.debug("Entering profile_handler")
     try:
@@ -141,12 +139,13 @@ async def profile_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
         *Referrals:* {referral_count}
         """
         await update.callback_query.message.edit_text(text=message,
-                                                      parse_mode='Markdown')
+                                                    parse_mode='Markdown')
     except Exception as e:
         logger.exception(f"An error occurred in profile_handler: {e}")
 
 
-async def referral_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+async def referral_handler(update: Update,
+                            context: ContextTypes.DEFAULT_TYPE) -> None:
     """Handles the 'Referral System' button."""
     logger.debug("Entering referral_handler")
     try:
@@ -158,7 +157,8 @@ async def referral_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -
         logger.exception(f"An error occurred in referral_handler: {e}")
 
 
-async def admin_panel_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+async def admin_panel_handler(update: Update,
+                              context: ContextTypes.DEFAULT_TYPE) -> None:
     """Handles the 'Admin Panel' button."""
     logger.debug("Entering admin_panel_handler")
     try:
@@ -167,7 +167,8 @@ async def admin_panel_handler(update: Update, context: ContextTypes.DEFAULT_TYPE
         logger.exception(f"An error occurred in admin_panel_handler: {e}")
 
 
-async def deposit_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+async def deposit_handler(update: Update,
+                          context: ContextTypes.DEFAULT_TYPE) -> None:
     """Handles the 'Deposit' button."""
     logger.debug("Entering deposit_handler")
     try:
@@ -175,7 +176,8 @@ async def deposit_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
             await context.bot.send_photo(
                 chat_id=update.effective_chat.id,
                 photo=qr_code_file,
-                caption="Pay This QR (PayTM) and click Paid button For Go To Next step.\nOr\nYou Can 📞 contact Our Admin And topup Your account."
+                caption=
+                "Pay This QR (PayTM) and click Paid button For Go To Next step.\nOr\nYou Can 📞 contact Our Admin And topup Your account."
             )
 
         # Create the "Paid" and "Admin" buttons
@@ -192,40 +194,12 @@ async def deposit_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
 
 
 # --- Error handler ---
-async def error_handler(update: object, context: ContextTypes.DEFAULT_TYPE) -> None:
+async def error_handler(update: object,
+                        context: ContextTypes.DEFAULT_TYPE) -> None:
     """Log the error and send a message to the developer."""
     logger.exception(msg="Exception while handling an update:",
                      exc_info=context.error)
 
 
 # --- Placeholder Handlers ---
-async def view_users_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    pass  # Add implementation
-
-async def edit_user_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    pass  # Add implementation
-
-# --- Flask routes ---
-@app.route('/' + TOKEN, methods=['POST'])
-async def webhook():
-    pass  # Add implementation
-
-@app.route('/')
-def index():
-    return "Hello, World!💀"
-
-# ... other code in bot.py
-
-if __name__ == "__main__":
-    try:
-        # ...
-
-        # --- Set webhook ---
-        application.run_webhook(
-            listen="0.0.0.0",
-            port=8080,
-            url_path=TOKEN,
-            webhook_url=f"https://final-hester-notcrazyhuman-94126448.koyeb.app/{TOKEN}"  # Updated webhook URL
-        )
-    except Exception as e:
-        logger.exception(f"An error occurred in __main__: {e}")
+async def view_users_
