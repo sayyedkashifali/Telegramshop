@@ -92,10 +92,4 @@ if __name__ == "__main__":
     # ...
 
     # --- Set webhook ---
-    application.run_webhook(
-        listen="0.0.0.0",
-        port=8080,
-        url_path=TOKEN,
-        webhook_url=f"https://{your_koyeb_app_name}.koyeb.app/{TOKEN}"  # Replace with your actual Koyeb app name
-          )
-                                                                   
+    
