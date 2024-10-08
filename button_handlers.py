@@ -1,7 +1,7 @@
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
 from telegram.ext import ContextTypes
 
-def profile_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+async def profile_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Handles the 'Profile' button."""
     user_id = update.effective_user.id
     # Fetch user data from the database (user ID, username, transactions, referrals)
@@ -15,19 +15,19 @@ def profile_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """
     await update.callback_query.message.edit_text(text=message, parse_mode='Markdown')
 
-def free_shop_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+async def free_shop_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Handles the 'Free Shop' button."""
     # Fetch and display items from the free shop
     # ... your shop logic ...
     pass  # Replace with your actual free shop code
 
-def paid_shop_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+async def paid_shop_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Handles the 'Paid Shop' button."""
     # Fetch and display items from the paid shop
     # ... your shop logic ...
     pass  # Replace with your actual paid shop code
 
-def referral_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+async def referral_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Handles the 'Referral System' button."""
     user_id = update.effective_user.id
     # Generate or fetch the user's unique referral ID
@@ -36,13 +36,13 @@ def referral_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None
     message = f"Share this link to invite others: {referral_link}"
     await update.callback_query.message.edit_text(text=message)
 
-def admin_panel_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+async def admin_panel_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Handles the 'Admin Panel' button."""
     # Redirect to the admin panel function (assuming you have one)
     from bot import admin_panel  # Import the admin_panel function from bot.py
     await admin_panel(update, context)
 
-def deposit_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+async def deposit_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Handles the 'Deposit' button."""
     # Send the QR code image and instructions
     await context.bot.send_photo(
@@ -60,3 +60,4 @@ def deposit_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         "Hey UNKNOWN.\nIf You paid Send us a screenshot.\n\nNote :-\nIf You send Fake proofs You got Permanently banned.",
         reply_markup=reply_markup
     )
+    
