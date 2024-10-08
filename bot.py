@@ -12,7 +12,7 @@ from telegram.ext import (Application, CallbackQueryHandler,
 from admin.panel import admin_panel, ADMIN_USER_IDS
 
 # --- Bot Token ---
-TOKEN = "7734029404:AAGjciB3zvBfxMP8XpePT3-mRQLsPAkCY74"  # Replace with your actual bot token
+TOKEN = ""  # Replace with your actual bot token
 
 # --- Other settings ---
 REQUIRED_CHANNEL = "@igdealsbykashif"  # Your channel username
