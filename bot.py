@@ -18,7 +18,7 @@ from free_shop import free_shop_handler
 from paid_shop import paid_shop_handler
 
 # --- Bot Token ---
-TOKEN = "8085073135:AAEpv0Vt56MPYpYAVmyjwmwUvGBcUFIzs6E"  # Your new bot token
+TOKEN = "8085073135:AAEpv0Vt56MPYpYAVmyjwmwUvGBcUFIzs6E"  # Your bot token
 
 # --- Other settings ---
 REQUIRED_CHANNEL = "@igdealsbykashif"  # Your channel username
@@ -27,8 +27,7 @@ LOG_CHANNEL_ID = "-1002429063387"  # Your log channel ID
 # Configure logging
 logging.basicConfig(
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-    level=logging.DEBUG  # Set to DEBUG for more detailed logs
-)
+    level=logging.DEBUG)  # Set to DEBUG for more detailed logs
 logger = logging.getLogger(__name__)
 
 # --- Initialize Flask app ---
@@ -130,74 +129,77 @@ async def profile_handler(update: Update,
                           context: ContextTypes.DEFAULT_TYPE) -> None:
     """Handles the 'Profile' button."""
     logger.debug("Entering profile_handler")
-    user_id = update.effective_user.id
-    # You need to implement logic to fetch user details from a database
-    username = "test_user"
-    transaction_count = 5
-    referral_count = 2
+    try:
+        user_id = update.effective_user.id
+        # Implement logic to fetch user details from the database
+        # For now, using placeholder data
+        username = "test_user"
+        transaction_count = 5
+        referral_count = 2
 
-    message = f"""
-    *User ID:* {user_id}
-    *Username:* {username}
-    *Transactions:* {transaction_count}
-    *Referrals:* {referral_count}
-    """
-    await update.callback_query.message.edit_text(text=message,
-                                                parse_mode='Markdown')
+        message = f"""
+        *User ID:* {user_id}
+        *Username:* {username}
+        *Transactions:* {transaction_count}
+        *Referrals:* {referral_count}
+        """
+        await update.callback_query.message.edit_text(text=message,
+                                                    parse_mode='Markdown')
+    except Exception as e:
+        logger.exception(f"An error occurred in profile_handler: {e}")
 
 
 async def referral_handler(update: Update,
                             context: ContextTypes.DEFAULT_TYPE) -> None:
     """Handles the 'Referral System' button."""
     logger.debug("Entering referral_handler")
-    user_id = update.effective_user.id
-    referral_link = f"https://t.me/your_bot?start={user_id}"  # Replace with your actual bot username
-    message = f"Share this link to invite others: {referral_link}"
-    await update.callback_query.message.edit_text(text=message)
+    try:
+        user_id = update.effective_user.id
+        referral_link = f"https://t.me/your_bot?start={user_id}"  # Replace with your actual bot username
+        message = f"Share this link to invite others: {referral_link}"
+        await update.callback_query.message.edit_text(text=message)
+    except Exception as e:
+        logger.exception(f"An error occurred in referral_handler: {e}")
 
 
 async def admin_panel_handler(update: Update,
                               context: ContextTypes.DEFAULT_TYPE) -> None:
     """Handles the 'Admin Panel' button."""
     logger.debug("Entering admin_panel_handler")
-    await admin_panel(update, context)
+    try:
+        await admin_panel(update, context)
+    except Exception as e:
+        logger.exception(f"An error occurred in admin_panel_handler: {e}")
 
 
 async def deposit_handler(update: Update,
                           context: ContextTypes.DEFAULT_TYPE) -> None:
     """Handles the 'Deposit' button."""
     logger.debug("Entering deposit_handler")
-    with open('qr_code.png', 'rb') as qr_code_file:
-        await context.bot.send_photo(
-            chat_id=update.effective_chat.id,
-            photo=qr_code_file,
-            caption=
-            "Pay This QR (PayTM) and click Paid button For Go To Next step.\nOr\nYou Can 📞 contact Our Admin And topup Your account."
-        )
+    try:
+        with open('qr_code.png', 'rb') as qr_code_file:
+            await context.bot.send_photo(
+                chat_id=update.effective_chat.id,
+                photo=qr_code_file,
+                caption=
+                "Pay This QR (PayTM) and click Paid button For Go To Next step.\nOr\nYou Can 📞 contact Our Admin And topup Your account."
+            )
 
-    # Create the "Paid" and "Admin" buttons
-    keyboard = [[
-        InlineKeyboardButton("Paid", callback_data='paid'),
-        InlineKeyboardButton("Admin", url='https://t.me/your_admin_username')
-    ]]
-    reply_markup = InlineKeyboardMarkup(keyboard)
-    await update.effective_message.reply_text(
-        "If You paid, Send us a screenshot.\n\nNote :-\nIf You send Fake proofs You will be permanently banned.",
-        reply_markup=reply_markup)
+        # Create the "Paid" and "Admin" buttons
+        keyboard = [[
+            InlineKeyboardButton("Paid", callback_data='paid'),
+            InlineKeyboardButton("Admin",
+                                 url='https://t.me/your_admin_username')
+        ]]
+        reply_markup = InlineKeyboardMarkup(keyboard)
+        await update.effective_message.reply_text(
+            "If You paid, Send us a screenshot.\n\nNote :-\nIf You send Fake proofs You will be permanently banned.",
+            reply_markup=reply_markup)
+    except Exception as e:
+        logger.exception(f"An error occurred in deposit_handler: {e}")
 
 
 # --- Error handler ---
 async def error_handler(update: object,
-                        context: ContextTypes.DEFAULT_TYPE) -> None:
-    """Log the error and send a message to the developer."""
-    logger.exception(msg="Exception while handling an update:",
-                 exc_info=context.error)
-
-
-# --- Flask routes ---
-@app.route('/' + TOKEN, methods=['POST'])
-async def webhook():
-    """Webhook route for Telegram updates."""
-    logger.debug("Webhook request received")
-    update = Update.de_json(request.get_json(force=True), application.bot)
+                        context: ContextTypes
                   
