@@ -1,4 +1,3 @@
-Sure, here's the updated README with the Koyeb deploy button and some added emojis:
 # Telegram Shop Bot 🛍️
 
 This repository contains the code for a Telegram Shop Bot built using Python and the `python-telegram-bot` library.
