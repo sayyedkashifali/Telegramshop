@@ -67,7 +67,7 @@ async def check_membership(update: Update,
             await update.message.reply_photo(
                 photo=random_image,
                 caption=
-                f"👋 Hey {user.mention_html()}!\n\nTo use this bot, you need to join our channel first. Click the button below to join and then press /start to start using the bot.",
+                f"\ud83d\udc4b Hey {user.mention_html()}!\n\nTo use this bot, you need to join our channel first. Click the button below to join and then press /start to start using the bot.",
                 reply_markup=keyboard,
                 parse_mode="HTML")
     except Exception as e:
@@ -86,11 +86,11 @@ async def start(update: Update,
     greeting = ""
 
     if 5 <= current_hour < 12:
-        greeting = "Good morning 🌞"
+        greeting = "Good morning \ud83c\udf1e"
     elif 12 <= current_hour < 18:
-        greeting = "Good afternoon ☀️"
+        greeting = "Good afternoon \u2600\ufe0f"
     else:
-        greeting = "Good evening 🌃"
+        greeting = "Good evening \ud83c\udf03"
 
     message = f"""
     {greeting} Hey! {user.mention_html()}
@@ -100,7 +100,7 @@ async def start(update: Update,
     Explore our wide selection of products, easily manage your orders, and track your purchases with just a few taps. 
     We are committed to providing you with the best possible service and ensuring your satisfaction. 
 
-    Happy shopping! 😊
+    Happy shopping! \ud83d\ude0a
     """
 
     keyboard = [[
@@ -177,7 +177,7 @@ async def deposit_handler(update: Update,
                 chat_id=update.effective_chat.id,
                 photo=qr_code_file,
                 caption=
-                "Pay This QR (PayTM) and click Paid button For Go To Next step.\nOr\nYou Can 📞 contact Our Admin And topup Your account."
+                "Pay This QR (PayTM) and click Paid button For Go To Next step.\nOr\nYou Can \ud83d\udcde contact Our Admin And topup Your account."
             )
 
         # Create the "Paid" and "Admin" buttons
