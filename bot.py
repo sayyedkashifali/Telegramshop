@@ -157,7 +157,7 @@ async def deposit_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
     logger.debug("Entering deposit_handler")
     try:
         # Replace 'qr_code.png' with the actual path to your QR code image
-        with open('qr_code.png', 'rb') as qr_code_file:  
+        with open('qr_code.png', 'rb') as qr_code_file:
             await context.bot.send_photo(
                 chat_id=update.effective_chat.id,
                 photo=qr_code_file,
@@ -185,9 +185,9 @@ async def error_handler(update: object, context: ContextTypes.DEFAULT_TYPE) -> N
 
 
 # --- Placeholder Handlers ---
-async def view_users_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+async def view_users_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:  
     """Placeholder for viewing users."""
     pass  # Add implementation
 
 
-async def edit_user_handler(update: Update, context: ContextTypes.
+async def edit_user_
