@@ -84,6 +84,16 @@ async def back_to_main_menu(update: Update, context: ContextTypes.DEFAULT_TYPE) 
     await start(update, context)  # Call the start function to display the main menu
     return ConversationHandler.END
 
+async def view_users_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    """Handle the 'View Users' button."""
+    # Add your implementation here
+    pass
+
+async def edit_user_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    """Handle the 'Edit User' button."""
+    # Add your implementation here
+    pass
+
 # Create the conversation handler
 admin_panel_conv_handler = ConversationHandler(
     entry_points=[CommandHandler("admin", admin_panel)],
