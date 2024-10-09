@@ -1,5 +1,6 @@
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import ContextTypes, ConversationHandler, CallbackQueryHandler, CommandHandler
+
 import database  # Import the database module
 
 # Get the database name from database.py
@@ -40,13 +41,16 @@ async def admin_panel(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int
         await update.message.reply_text("You do not have access to the admin panel.")
         return ConversationHandler.END
 
-# ... (your users_menu, referrals_menu, shop_menu, broadcast_menu functions)
+# Define the users_menu function
+async def users_menu(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    """Handle the 'Users' button in the admin panel."""
+    # Your logic to handle users menu goes here
+    await update.message.reply_text("Users menu selected.")
+    return USERS_MENU
 
-# ... (your back_to_admin_menu, back_to_main_menu functions)
+# Define other necessary functions (referrals_menu, shop_menu, broadcast_menu, etc.)
 
-# ... (your view_users_handler, edit_user_handler, edit_user_balance_handler functions)
-
-# Create the conversation handler (Now users_menu is defined before being used)
+# Create the conversation handler
 admin_panel_conv_handler = ConversationHandler(
     entry_points=[CommandHandler("admin", admin_panel)],
     states={
