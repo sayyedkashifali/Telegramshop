@@ -91,31 +91,29 @@ async def edit_user_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) 
     pass
 
 # Create the conversation handler
-from telegram.ext import ConversationHandler
-
 admin_panel_conv_handler = ConversationHandler(
     entry_points=[CommandHandler("admin", admin_panel)],
     states={
         ADMIN_MENU: [
-            CallbackQueryHandler(users_menu, pattern="users", per_message=True),
-            CallbackQueryHandler(referrals_menu, pattern="referrals", per_message=True),
-            CallbackQueryHandler(shop_menu, pattern="shop", per_message=True),
-            CallbackQueryHandler(broadcast_menu, pattern="broadcast", per_message=True),
-            CallbackQueryHandler(back_to_main_menu, pattern="back", per_message=True)
+            CallbackQueryHandler(users_menu, pattern="users"),
+            CallbackQueryHandler(referrals_menu, pattern="referrals"),
+            CallbackQueryHandler(shop_menu, pattern="shop"),
+            CallbackQueryHandler(broadcast_menu, pattern="broadcast"),
+            CallbackQueryHandler(back_to_main_menu, pattern="back")
         ],
         USERS_MENU: [
-            CallbackQueryHandler(view_users_handler, pattern="view_users", per_message=True),
-            CallbackQueryHandler(edit_user_handler, pattern="edit_user", per_message=True),
-            CallbackQueryHandler(back_to_admin_menu, pattern="back_to_admin", per_message=True)
+            CallbackQueryHandler(view_users_handler, pattern="view_users"),
+            CallbackQueryHandler(edit_user_handler, pattern="edit_user"),
+            CallbackQueryHandler(back_to_admin_menu, pattern="back_to_admin")
         ],
         REFERRALS_MENU: [
-            CallbackQueryHandler(back_to_admin_menu, pattern="back_to_admin", per_message=True)
+            CallbackQueryHandler(back_to_admin_menu, pattern="back_to_admin")
         ],
         SHOP_MENU: [
-            CallbackQueryHandler(back_to_admin_menu, pattern="back_to_admin", per_message=True)
+            CallbackQueryHandler(back_to_admin_menu, pattern="back_to_admin")
         ],
         BROADCAST_MENU: [
-            CallbackQueryHandler(back_to_admin_menu, pattern="back_to_admin", per_message=True)
+            CallbackQueryHandler(back_to_admin_menu, pattern="back_to_admin")
         ]
     },
     fallbacks=[]  # You might want to add a fallback handler here
