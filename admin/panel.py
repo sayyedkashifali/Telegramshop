@@ -48,7 +48,14 @@ async def users_menu(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     await update.message.reply_text("Users menu selected.")
     return USERS_MENU
 
-# Define other necessary functions (referrals_menu, shop_menu, broadcast_menu, etc.)
+# Define the referrals_menu function
+async def referrals_menu(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    """Handle the 'Referrals' button in the admin panel."""
+    # Your logic to handle referrals menu goes here
+    await update.message.reply_text("Referrals menu selected.")
+    return REFERRALS_MENU
+
+# Define other necessary functions (shop_menu, broadcast_menu, etc.)
 
 # Create the conversation handler
 admin_panel_conv_handler = ConversationHandler(
