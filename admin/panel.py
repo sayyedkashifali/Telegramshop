@@ -1,22 +1,18 @@
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import ContextTypes, ConversationHandler, CallbackQueryHandler, CommandHandler
 
-# ... other imports
+ADMIN_USER_IDS = [5881638979, 5463285002]
 
-ADMIN_USER_IDS = [5881638979, 5463285002]  # Updated admin IDs
-
-# Define states for the conversation
 ADMIN_MENU, USERS_MENU, REFERRALS_MENU, SHOP_MENU, BROADCAST_MENU = range(5)
 
 async def admin_panel(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
-    """Display the main admin panel menu."""
     user_id = update.effective_user.id
     if user_id in ADMIN_USER_IDS:
         admin_id = update.effective_user.id
 
         await context.bot.send_photo(
             chat_id=update.effective_chat.id,
-            photo="https://files.catbox.moe/x79o1v.jpg",  # Replace with the actual photo URL
+            photo="https://files.catbox.moe/x79o1v.jpg",
             caption=f"Welcome to the Admin Panel, Admin {admin_id}!"
         )
 
@@ -35,7 +31,6 @@ async def admin_panel(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int
         return ConversationHandler.END
 
 async def users_menu(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
-    """Display the users menu."""
     keyboard = [
         [InlineKeyboardButton("View Users", callback_data='view_users')],
         [InlineKeyboardButton("Edit User", callback_data='edit_user')],
@@ -46,7 +41,6 @@ async def users_menu(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     return USERS_MENU
 
 async def referrals_menu(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
-    """Display the referrals menu."""
     keyboard = [
         [InlineKeyboardButton("Back", callback_data='back_to_admin')]
     ]
@@ -55,7 +49,6 @@ async def referrals_menu(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
     return REFERRALS_MENU
 
 async def shop_menu(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
-    """Display the shop menu."""
     keyboard = [
         [InlineKeyboardButton("Back", callback_data='back_to_admin')]
     ]
@@ -64,7 +57,6 @@ async def shop_menu(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     return SHOP_MENU
 
 async def broadcast_menu(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
-    """Display the broadcast menu."""
     keyboard = [
         [InlineKeyboardButton("Back", callback_data='back_to_admin')]
     ]
@@ -73,24 +65,20 @@ async def broadcast_menu(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
     return BROADCAST_MENU
 
 async def back_to_admin_menu(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
-    """Handle the 'Back' button to return to the main admin menu."""
     return await admin_panel(update, context)
 
 async def back_to_main_menu(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
-    """Handle the 'Back' button to return to the main menu."""
-    from bot import start  # Import start function from bot.py
-    await start(update, context)  # Call the start function to display the main menu
+    from bot import start
+    await start(update, context)
     return ConversationHandler.END
 
 async def view_users_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
-    """Handle the 'View Users' button."""
     pass
 
 async def edit_user_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
-    """Handle the 'Edit User' button."""
     pass
 
-# Create the conversation handler
+# Updated conversation handler with fallbacks
 admin_panel_conv_handler = ConversationHandler(
     entry_points=[CommandHandler("admin", admin_panel)],
     states={
@@ -116,5 +104,5 @@ admin_panel_conv_handler = ConversationHandler(
             CallbackQueryHandler(back_to_admin_menu, pattern="back_to_admin")
         ]
     },
-    fallbacks=[]  # You might want to add a fallback handler here
+    fallbacks=[CommandHandler("cancel", back_to_main_menu)]  # Added fallback
 )
