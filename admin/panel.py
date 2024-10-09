@@ -3,7 +3,7 @@ from telegram.ext import ContextTypes, ConversationHandler, CallbackQueryHandler
 import database  # Import the database module
 
 # Get the database name from database.py
-DATABASE_NAME = database.DATABASE_NAME
+DATABASE_NAME = "Flexer_Premium_Shop"  # Use the provided database name
 
 # Admin user IDs (replace with actual IDs)
 ADMIN_USER_IDS = [5881638979, 5463285002]
@@ -59,7 +59,7 @@ async def edit_user_balance_handler(update: Update, context: ContextTypes.DEFAUL
 
         # Update the user's balance in the database
         client = database.connect_db()
-        db = client[DATABASE_NAME]  # Use the database name from database.py
+        db = client[DATABASE_NAME]  # Use the provided database name
         database.update_user_balance(db, user_id, new_balance)
         client.close()
 
