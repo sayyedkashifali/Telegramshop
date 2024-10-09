@@ -1,9 +1,12 @@
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import ContextTypes, ConversationHandler, CallbackQueryHandler, CommandHandler
+import database  # Import the database module
 
-# ... other imports
+# Get the database name from database.py
+DATABASE_NAME = "Flexer_Premium_Shop"  # Use the provided database name
 
-ADMIN_USER_IDS = [5881638979, 5463285002]  # Updated admin IDs
+# Admin user IDs (replace with actual IDs)
+ADMIN_USER_IDS = [5881638979, 5463285002]
 
 # Define states for the conversation
 ADMIN_MENU, USERS_MENU, REFERRALS_MENU, SHOP_MENU, BROADCAST_MENU, EDIT_USER_BALANCE = range(6)
@@ -12,13 +15,32 @@ async def admin_panel(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int
     """Display the main admin panel menu."""
     user_id = update.effective_user.id
     if user_id in ADMIN_USER_IDS:
-        # ... (rest of your admin_panel function)
+        # Get the admin's user ID
+        admin_id = update.effective_user.id
 
-async def users_menu(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:  # Define users_menu before use
-    """Display the users menu."""
-    # ... (rest of your users_menu function)
+        # Send the welcome photo
+        await context.bot.send_photo(
+            chat_id=update.effective_chat.id,
+            photo="https://files.catbox.moe/x79o1v.jpg",  # Replace with the actual photo URL
+            caption=f"Welcome to the Admin Panel, Admin {admin_id}!"
+        )
 
-# ... (your referrals_menu, shop_menu, broadcast_menu functions)
+        # Display admin panel options
+        keyboard = [
+            [InlineKeyboardButton("Users", callback_data='users')],
+            [InlineKeyboardButton("Referrals", callback_data='referrals')],
+            [InlineKeyboardButton("Shop", callback_data='shop')],
+            [InlineKeyboardButton("Broadcast", callback_data='broadcast')],
+            [InlineKeyboardButton("Back", callback_data='back')]
+        ]
+        reply_markup = InlineKeyboardMarkup(keyboard)
+        await update.message.reply_text("Admin Panel:", reply_markup=reply_markup)
+        return ADMIN_MENU
+    else:
+        await update.message.reply_text("You do not have access to the admin panel.")
+        return ConversationHandler.END
+
+# ... (your users_menu, referrals_menu, shop_menu, broadcast_menu functions)
 
 # ... (your back_to_admin_menu, back_to_main_menu functions)
 
