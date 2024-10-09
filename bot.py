@@ -192,6 +192,5 @@ async def deposit_handler(update: Update,
         await update.effective_message.reply_text(
             "If You paid, Send us a screenshot.\n\nNote:\nIf You send Fake proofs You will be permanently banned.",
             reply_markup=reply_markup)
-    except Exception as e:
-        logger.exception(f
+logger.exception(f"An error occurred in check_membership: {e}")
                            
