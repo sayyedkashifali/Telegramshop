@@ -1,3 +1,4 @@
 Flask
 python-telegram-bot==13.0
 pymongo
+urllib3
