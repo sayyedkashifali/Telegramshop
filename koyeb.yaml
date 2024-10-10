@@ -1,13 +1,7 @@
-name: my-telegram-bot  # Choose a name for your service
+name: telegramshop-bot
 services:
-  - name: bot  # Name of your service
-    instance_type: nano  # Choose an instance type
-    regions: [fra1]  # Select a region
+  - name: telegramshop-service
+    image:
+      name: your-docker-image
     ports:
-      - port: 8080  # The port your Flask app will listen on
-        protocol: http 
-    env:
-      - key: BOT_TOKEN  # Set your bot token as an environment variable
-        value: YOUR_BOT_TOKEN
-    build:
-      dockerfile: Dockerfile  # Path to your Dockerfile
+      - port: 80
