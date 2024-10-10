@@ -25,4 +25,4 @@ jobs:
         env:
           TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
         run: |
-          python path/to/your/bot_script.py
+          python bot.py
