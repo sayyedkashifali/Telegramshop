@@ -1,5 +1,5 @@
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
-from telegram.ext import ContextTypes, ConversationHandler, CallbackQueryHandler, CommandHandler, MessageHandler, filters
+from telegram.ext import ContextTypes, ConversationHandler, CallbackQueryHandler, CommandHandler
 
 import database  # Import the database module
 
@@ -152,7 +152,7 @@ async def return_to_previous_menu(update: Update, context: ContextTypes.DEFAULT_
 
 # Create the conversation handler
 admin_panel_conv_handler = ConversationHandler(
-    entry_points=[CommandHandler("admin", admin_panel)],
+    entry_points=[CallbackQueryHandler(admin_panel, pattern="admin")],
     states={
         ADMIN_MENU: [
             CallbackQueryHandler(users_menu, pattern="users"),
@@ -167,7 +167,7 @@ admin_panel_conv_handler = ConversationHandler(
             CallbackQueryHandler(back_to_admin_menu, pattern="back_to_admin")
         ],
         EDIT_USER_BALANCE: [
-            MessageHandler(filters.TEXT & ~filters.COMMAND, edit_user_balance)
+            CallbackQueryHandler(edit_user_balance, pattern="edit_user_balance")
         ],
         REFERRALS_MENU: [
             CallbackQueryHandler(back_to_admin_menu, pattern="back_to_admin")
