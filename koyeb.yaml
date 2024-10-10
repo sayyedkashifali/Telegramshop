@@ -1,7 +1,0 @@
-name: telegramshop-bot
-services:
-  - name: telegramshop-service
-    image:
-      name: your-docker-image
-    ports:
-      - port: 80
