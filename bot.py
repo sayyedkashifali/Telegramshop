@@ -110,4 +110,20 @@ def run_telegram_bot():
     application.add_handler(CallbackQueryHandler(paid_shop_handler, pattern='paid_shop'))
     application.add_handler(CallbackQueryHandler(referral_handler, pattern='referral'))
     application.add_handler(CallbackQueryHandler(admin_panel_handler, pattern='admin'))
-    application.add_handler(CallbackQueryHandler
+    application.add_handler(CallbackQueryHandler(deposit_handler, pattern='deposit'))
+
+    asyncio.set_event_loop(asyncio.new_event_loop())
+    while True:
+        try:
+            application.run_polling()
+        except Exception as e:
+            logger.error(f"An error occurred: {e}")
+            time.sleep(10)
+
+# --- Main Function ---
+if __name__ == '__main__':
+    flask_thread = threading.Thread(target=run_flask_app)
+    bot_thread = threading.Thread(target=run_telegram_bot)
+
+    flask_thread.start()
+    bot_thread.start()
