@@ -6,10 +6,8 @@ import threading
 from datetime import datetime
 
 from flask import Flask
-from telegram import (ChatMember, InlineKeyboardButton, InlineKeyboardMarkup,
-                      Update)
-from telegram.ext import (Application, CallbackQueryHandler, CommandHandler,
-                          ContextTypes, MessageHandler, filters)
+from telegram import (ChatMember, InlineKeyboardButton, InlineKeyboardMarkup, Update)
+from telegram.ext import (Application, CallbackQueryHandler, CommandHandler, ContextTypes, MessageHandler, filters)
 
 # Import the admin panel and admin user IDs
 from admin.panel import ADMIN_USER_IDS, admin_panel_conv_handler
@@ -34,38 +32,28 @@ logger = logging.getLogger(__name__)
 # --- Flask App ---
 app = Flask(__name__)
 
-
-# --- Your Flask routes ---
 @app.route('/')
 def index():
     return "Hello from Flask!"
 
 
 # --- Check Membership ---
-async def check_membership(update: Update,
-                            context: ContextTypes.DEFAULT_TYPE):
+async def check_membership(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Checks if the user has joined the required channel."""
     logger.debug("Entering check_membership handler")
     try:
         user = update.effective_user
-        chat_member = await context.bot.get_chat_member(
-            chat_id=REQUIRED_CHANNEL, user_id=user.id)
+        chat_member = await context.bot.get_chat_member(chat_id=REQUIRED_CHANNEL, user_id=user.id)
 
-        if chat_member.status in [
-                ChatMember.MEMBER, ChatMember.CREATOR,
-                ChatMember.ADMINISTRATOR
-        ]:
-            # User is a member, proceed with the bot's functionality
+        if chat_member.status in [ChatMember.MEMBER, ChatMember.CREATOR, ChatMember.ADMINISTRATOR]:
             logger.debug("User is a member")
-            await start(
-                update, context)  # Call the start function here
+            await start(update, context)  # Call the start function here
         else:
             # User is not a member, send a message asking them to join
             join_link = f"https://t.me/{REQUIRED_CHANNEL.removeprefix('@')}"
             keyboard = InlineKeyboardMarkup.from_button(
                 InlineKeyboardButton("Join Channel", url=join_link))
 
-            # List of image URLs
             images = [
                 "https://files.catbox.moe/z131hg.jpg",
                 "https://files.catbox.moe/i0cepb.jpg",
@@ -74,13 +62,11 @@ async def check_membership(update: Update,
                 "https://files.catbox.moe/m92opv.jpg",
                 "https://files.catbox.moe/dt641v.jpg"
             ]
-            # Choose a random image from the list
             random_image = random.choice(images)
 
             await update.message.reply_photo(
                 photo=random_image,
-                caption=
-                f"👋 Hey {user.mention_html()}!\n\nTo use this bot, you need to join our channel first. Click the button below to join and then press /start to start using the bot.",
+                caption=f"👋 Hey {user.mention_html()}!\n\nTo use this bot, you need to join our channel first. Click the button below to join and then press /start to start using the bot.",
                 reply_markup=keyboard,
                 parse_mode="HTML")
     except Exception as e:
@@ -88,7 +74,7 @@ async def check_membership(update: Update,
 
 
 # --- Start Function ---
-async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Handles the /start command."""
     logger.debug("Entering start handler")
     try:
@@ -115,37 +101,25 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         """
 
         keyboard = [
-            [
-                InlineKeyboardButton("Profile", callback_data='profile'),
-                InlineKeyboardButton("Free Shop", callback_data='free_shop')
-            ],
-            [
-                InlineKeyboardButton("Paid Shop", callback_data='paid_shop'),
-                InlineKeyboardButton("Referral System",
-                                     callback_data='referral')
-            ],
-            [
-                InlineKeyboardButton("Admin Panel", callback_data='admin'),
-                InlineKeyboardButton("Deposit", callback_data='deposit')
-            ]
+            [InlineKeyboardButton("Profile", callback_data='profile'),
+             InlineKeyboardButton("Free Shop", callback_data='free_shop')],
+            [InlineKeyboardButton("Paid Shop", callback_data='paid_shop'),
+             InlineKeyboardButton("Referral System", callback_data='referral')],
+            [InlineKeyboardButton("Admin Panel", callback_data='admin'),
+             InlineKeyboardButton("Deposit", callback_data='deposit')]
         ]
         reply_markup = InlineKeyboardMarkup(keyboard)
-        await update.message.reply_text(message,
-                                        reply_markup=reply_markup,
-                                        parse_mode="HTML")
+        await update.message.reply_text(message, reply_markup=reply_markup, parse_mode="HTML")
     except Exception as e:
         logger.exception(f"An error occurred in start: {e}")
 
 
 # --- Button Handlers ---
-async def profile_handler(update: Update,
-                          context: ContextTypes.DEFAULT_TYPE) -> None:
+async def profile_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Handles the 'Profile' button."""
     logger.debug("Entering profile_handler")
     try:
         user_id = update.effective_user.id
-        # Implement logic to fetch user details from the database
-        # For now, using placeholder data
         username = "test_user"
         transaction_count = 5
         referral_count = 2
@@ -156,61 +130,69 @@ async def profile_handler(update: Update,
         *Transactions:* {transaction_count}
         *Referrals:* {referral_count}
         """
-        await update.callback_query.message.edit_text(text=message,
-                                                      parse_mode='Markdown')
+        await update.callback_query.message.edit_text(text=message, parse_mode='Markdown')
     except Exception as e:
         logger.exception(f"An error occurred in profile_handler: {e}")
 
 
-async def referral_handler(update: Update,
-                           context: ContextTypes.DEFAULT_TYPE) -> None:
+async def referral_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Handles the 'Referral System' button."""
     logger.debug("Entering referral_handler")
     try:
         user_id = update.effective_user.id
-        referral_link = f"https://t.me/your_bot?start={user_id}"  # Replace with your actual bot username
+        referral_link = f"https://t.me/your_bot?start={user_id}"
         message = f"Share this link to invite others: {referral_link}"
         await update.callback_query.message.edit_text(text=message)
     except Exception as e:
         logger.exception(f"An error occurred in referral_handler: {e}")
 
 
-async def admin_panel_handler(update: Update,
-                              context: ContextTypes.DEFAULT_TYPE) -> None:
+async def admin_panel_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Handles the 'Admin Panel' button."""
     logger.debug("Entering admin_panel_handler")
     try:
-        await admin_panel_conv_handler(
-            update, context)  # Using the correct variable name
+        await admin_panel_conv_handler(update, context)
     except Exception as e:
         logger.exception(f"An error occurred in admin_panel_handler: {e}")
 
 
-async def deposit_handler(update: Update,
-                          context: ContextTypes.DEFAULT_TYPE) -> None:
+async def deposit_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Handles the 'Deposit' button."""
     logger.debug("Entering deposit_handler")
     try:
-        # Replace 'qr_code.png' with the actual path to your QR code image
         with open('qr_code.png', 'rb') as qr_code_file:
-            await context.bot.send_photo(
-                chat_id=update.effective_chat.id,
-                photo=qr_code_file,
-                caption=
-                "Pay This QR (PayTM) and click Paid button to Go to the Next step.\nOr\nYou Can 📞 contact Our Admin And top up Your account."
-            )
+            await context.bot.send_photo(chat_id=update.effective_chat.id, photo=qr_code_file, caption="Pay This QR (PayTM) and click Paid button to Go to the Next step.")
 
-        # Create the "Paid" and "Admin" buttons
         keyboard = [
-            [
-                InlineKeyboardButton("Paid", callback_data='paid'),
-                InlineKeyboardButton("Admin", url='https://t.me/Sayyed_Kashifali')
-            ]
+            [InlineKeyboardButton("Paid", callback_data='paid'),
+             InlineKeyboardButton("Admin", url='https://t.me/Sayyed_Kashifali')]
         ]
         reply_markup = InlineKeyboardMarkup(keyboard)
-        await update.effective_message.reply_text(
-            "If You paid, Send us a screenshot.\n\nNote:\nIf You send Fake proofs You will be permanently banned.",
-            reply_markup=reply_markup)
+        await update.effective_message.reply_text("If You paid, Send us a screenshot.\n\nNote: If You send Fake proofs You will be permanently banned.", reply_markup=reply_markup)
     except Exception as e:
-        logger.exception
-        
+        logger.exception(f"An error occurred in deposit_handler: {e}")
+
+
+# --- Run Flask in a separate thread ---
+def run_flask():
+    app.run(host="0.0.0.0", port=5000, threaded=True)
+
+def main():
+    application = Application.builder().token(TOKEN).build()
+
+    # Add command and callback query handlers
+    application.add_handler(CommandHandler('start', start))
+    application.add_handler(CallbackQueryHandler(profile_handler, pattern='profile'))
+    application.add_handler(CallbackQueryHandler(referral_handler, pattern='referral'))
+    application.add_handler(CallbackQueryHandler(admin_panel_handler, pattern='admin'))
+    application.add_handler(CallbackQueryHandler(deposit_handler, pattern='deposit'))
+    
+    # Start Flask in a separate thread
+    flask_thread = threading.Thread(target=run_flask)
+    flask_thread.start()
+
+    # Start polling
+    application.run_polling()
+
+if __name__ == "__main__":
+    main()
