@@ -10,15 +10,10 @@ from telegram import ChatMember, InlineKeyboardButton, InlineKeyboardMarkup, Upd
 from telegram.ext import (Application, CallbackQueryHandler, CommandHandler,
                           ContextTypes, MessageHandler, filters)
 
-# Import the admin panel and admin user IDs
-from admin.panel import ADMIN_USER_IDS, admin_panel_conv_handler
-
-# Import shop handlers
-from free_shop import free_shop_handler
-from paid_shop import paid_shop_handler
-
-# --- Bot Token ---
-TOKEN = os.environ.get("BOT_TOKEN")
+# --- Bot Token and API details ---
+TOKEN = "8085073135:AAEpv0Vt56MPYpYAVmyjwmwUvGBcUFIzs6E"
+API_ID = "27317700"
+API_HASH = "de1077f45e29e6abebcd2b9dd196be1d"
 
 # --- Other settings ---
 REQUIRED_CHANNEL = "@igdealsbykashif"  # Your channel username
