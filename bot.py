@@ -2,6 +2,7 @@ import os
 import logging
 import random
 from datetime import datetime
+import time
 
 from telegram import (InlineKeyboardButton, InlineKeyboardMarkup, Update,
                       ChatMember)
@@ -32,7 +33,7 @@ logger = logging.getLogger(__name__)
 
 # --- Check Membership ---
 async def check_membership(update: Update,
-                            context: ContextTypes.DEFAULT_TYPE):
+                           context: ContextTypes.DEFAULT_TYPE):
     """Checks if the user has joined the required channel."""
     logger.debug("Entering check_membership handler")
     try:
@@ -67,7 +68,8 @@ async def check_membership(update: Update,
 
             await update.message.reply_photo(
                 photo=random_image,
-                caption=f"👋 Hey {user.mention_html()}!\n\nTo use this bot, you need to join our channel first. Click the button below to join and then press /start to start using the bot.",
+                caption=
+                f"👋 Hey {user.mention_html()}!\n\nTo use this bot, you need to join our channel first. Click the button below to join and then press /start to start using the bot.",
                 reply_markup=keyboard,
                 parse_mode="HTML")
     except Exception as e:
@@ -103,12 +105,19 @@ async def start(update: Update,
         """
 
         keyboard = [
-            [InlineKeyboardButton("Profile", callback_data='profile'),
-             InlineKeyboardButton("Free Shop", callback_data='free_shop')],
-            [InlineKeyboardButton("Paid Shop", callback_data='paid_shop'),
-             InlineKeyboardButton("Referral System", callback_data='referral')],
-            [InlineKeyboardButton("Admin Panel", callback_data='admin'),
-             InlineKeyboardButton("Deposit", callback_data='deposit')]
+            [
+                InlineKeyboardButton("Profile", callback_data='profile'),
+                InlineKeyboardButton("Free Shop", callback_data='free_shop')
+            ],
+            [
+                InlineKeyboardButton("Paid Shop", callback_data='paid_shop'),
+                InlineKeyboardButton("Referral System",
+                                     callback_data='referral')
+            ],
+            [
+                InlineKeyboardButton("Admin Panel", callback_data='admin'),
+                InlineKeyboardButton("Deposit", callback_data='deposit')
+            ]
         ]
         reply_markup = InlineKeyboardMarkup(keyboard)
         await update.message.reply_text(message,
@@ -161,7 +170,8 @@ async def admin_panel_handler(update: Update,
     """Handles the 'Admin Panel' button."""
     logger.debug("Entering admin_panel_handler")
     try:
-        await admin_panel_conv_handler(update, context)  # Using the correct variable name
+        await admin_panel_conv_handler(
+            update, context)  # Using the correct variable name
     except Exception as e:
         logger.exception(f"An error occurred in admin_panel_handler: {e}")
 
@@ -171,30 +181,7 @@ async def deposit_handler(update: Update,
     """Handles the 'Deposit' button."""
     logger.debug("Entering deposit_handler")
     try:
-        # Replace 'qr_code.png' with the actual path to your QR code image
-        with open('qr_code.png', 'rb') as qr_code_file:
-            await context.bot.send_photo(
-                chat_id=update.effective_chat.id,
-                photo=qr_code_file,
-                caption="Pay This QR (PayTM) and click Paid button to Go to the Next step.\nOr\nYou Can 📞 contact Our Admin And top up Your account."
-            )
+        # Use the QR code link you provided
+        qr_code_link = "https://files.catbox.moe/ef4lat.jpg"
 
-        # Create the "Paid" and "Admin" buttons
-        keyboard = [
-            [InlineKeyboardButton("Paid", callback_data='paid'),
-             InlineKeyboardButton("Admin", url='https://t.me/Sayyed_Kashifali')]
-        ]
-        reply_markup = InlineKeyboardMarkup(keyboard)
-        await update.effective_message.reply_text(
-            "If You paid, Send us a screenshot.\n\nNote:\nIf You send Fake proofs You will be permanently banned.",
-            reply_markup=reply_markup)
-    except Exception as e:
-        logger.exception(f"An error occurred in deposit_handler: {e}")
-
-
-# Create the Application and pass it your bot's token.
-application = Application.builder().token(TOKEN).build()
-
-# Add handlers
-application.add_handler
-      
+        await context.bot.send
