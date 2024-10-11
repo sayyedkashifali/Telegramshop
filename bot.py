@@ -69,10 +69,10 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         keyboard = [
             [InlineKeyboardButton("Profile", callback_data='profile'),
              InlineKeyboardButton("Free Shop", callback_data='free_shop')],
-            [InlineKeyboardButton("Paid Shop", callback_data='paid_shop'),
-             InlineKeyboardButton("Referral System", callback_data='referral')],
-            [InlineKeyboardButton("Admin Panel", callback_data='admin'),
-             InlineKeyboardButton("Deposit", callback_data='deposit')]
+            [InlineKeyboardButton("Paid Shop", callback_data='paid_shop')],
+            [InlineKeyboardButton("Referral System", callback_data='referral')],
+            [InlineKeyboardButton("Admin Panel", callback_data='admin')],
+            [InlineKeyboardButton("Deposit", callback_data='deposit')]
         ]
         reply_markup = InlineKeyboardMarkup(keyboard)
         await update.message.reply_text(message, reply_markup=reply_markup, parse_mode="HTML")
@@ -102,28 +102,25 @@ def run_flask_app():
     print("Flask app started successfully!")
 
 def run_telegram_bot():
-    application = Application.builder().token(TOKEN).build()
+    async def main():
+        application = Application.builder().token(TOKEN).build()
 
-    application.add_handler(CommandHandler("start", check_membership))
-    application.add_handler(CallbackQueryHandler(profile_handler, pattern='profile'))
-    application.add_handler(CallbackQueryHandler(free_shop_handler, pattern='free_shop'))
-    application.add_handler(CallbackQueryHandler(paid_shop_handler, pattern='paid_shop'))
-    application.add_handler(CallbackQueryHandler(referral_handler, pattern='referral'))
-    application.add_handler(CallbackQueryHandler(admin_panel_handler, pattern='admin'))
-    application.add_handler(CallbackQueryHandler(deposit_handler, pattern='deposit'))
+        application.add_handler(CommandHandler("start", check_membership))
+        application.add_handler(CallbackQueryHandler(profile_handler, pattern='profile'))
+        application.add_handler(CallbackQueryHandler(free_shop_handler, pattern='free_shop'))
+        application.add_handler(CallbackQueryHandler(paid_shop_handler, pattern='paid_shop'))
+        application.add_handler(CallbackQueryHandler(referral_handler, pattern='referral'))
+        application.add_handler(CallbackQueryHandler(admin_panel_handler, pattern='admin'))
+        application.add_handler(CallbackQueryHandler(deposit_handler, pattern='deposit'))
 
-    asyncio.set_event_loop(asyncio.new_event_loop())
-    while True:
-        try:
-            application.run_polling()
-        except Exception as e:
-            logger.error(f"An error occurred: {e}")
-            time.sleep(10)
+        await application.run_polling()
+
+    asyncio.run(main())
 
 # --- Main Function ---
 if __name__ == '__main__':
     flask_thread = threading.Thread(target=run_flask_app)
-    bot_thread = threading.Thread(target=run_telegram_bot)
-
     flask_thread.start()
-    bot_thread.start()
+
+    # Ensure that the Telegram bot runs in the main thread to avoid event loop issues
+    run_telegram_bot()
