@@ -38,34 +38,7 @@ def index():
 
 # --- Check Membership ---
 async def check_membership(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    logger.debug("Entering check_membership handler")
-    try:
-        user = update.effective_user
-        chat_member = await context.bot.get_chat_member(chat_id=REQUIRED_CHANNEL, user_id=user.id)
-
-        if chat_member.status in [ChatMember.MEMBER, ChatMember.CREATOR, ChatMember.ADMINISTRATOR]:
-            logger.debug("User is a member")
-            await start(update, context)
-        else:
-            join_link = f"https://t.me/{REQUIRED_CHANNEL.removeprefix('@')}"
-            keyboard = InlineKeyboardMarkup.from_button(InlineKeyboardButton("Join Channel", url=join_link))
-
-            images = [
-                "https://files.catbox.moe/z131hg.jpg",
-                "https://files.catbox.moe/i0cepb.jpg",
-            ]
-            random_image = random.choice(images)
-
-            await update.message.reply_photo(
-                photo=random_image,
-                caption=f"👋 Hey {user.mention_html()}!\n\n"
-                        f"To use this bot, you need to join our channel first. "
-                        f"Click the button below to join and then press /start to start using the bot.",
-                reply_markup=keyboard,
-                parse_mode="HTML"
-            )
-    except Exception as e:
-        logger.exception(f"An error occurred in check_membership: {e}")
+    # ... (your existing check_membership function code) ...
 
 # --- Start Function ---
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -73,16 +46,53 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
 # --- Button Handlers ---
 async def profile_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    # ... (your existing profile_handler function code) ...
+    """Handles the 'Profile' button."""
+    logger.debug("Entering profile_handler")
+    try:
+        user_id = update.effective_user.id
+        # Implement logic to fetch user details from the database
+        # For now, using placeholder data
+        username = "test_user"
+        transaction_count = 5
+        referral_count = 2
+
+        message = f"""
+        *User ID:* {user_id}
+        *Username:* {username}
+        *Transactions:* {transaction_count}
+        *Referrals:* {referral_count}
+        """
+        await update.callback_query.message.edit_text(text=message, parse_mode='Markdown')
+    except Exception as e:
+        logger.exception(f"An error occurred in profile_handler: {e}")
 
 async def referral_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    # ... (your existing referral_handler function code) ...
+    """Handles the 'Referral System' button."""
+    logger.debug("Entering referral_handler")
+    try:
+        user_id = update.effective_user.id
+        referral_link = f"https://t.me/your_bot?start={user_id}"  # Replace with your actual bot username
+        message = f"Share this link to invite others: {referral_link}"
+        await update.callback_query.message.edit_text(text=message)
+    except Exception as e:
+        logger.exception(f"An error occurred in referral_handler: {e}")
 
 async def admin_panel_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    # ... (your existing admin_panel_handler function code) ...
+    """Handles the 'Admin Panel' button."""
+    logger.debug("Entering admin_panel_handler")
+    try:
+        await admin_panel_conv_handler(update, context)
+    except Exception as e:
+        logger.exception(f"An error occurred in admin_panel_handler: {e}")
 
 async def deposit_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    # ... (your existing deposit_handler function code) ...
+    """Handles the 'Deposit' button."""
+    logger.debug("Entering deposit_handler")
+    try:
+        with open('qr_code.png', 'rb') as qr_code_file:
+            await context.bot.send_photo(chat_id=update.effective_chat.id, photo=qr_code_file)
+    except Exception as e:
+        logger.exception(f"An error occurred in deposit_handler: {e}")
 
 def run_flask_app():
     print("Starting Flask app...")
