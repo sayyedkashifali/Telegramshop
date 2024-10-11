@@ -107,8 +107,9 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         logger.exception(f"An error occurred in start: {e}")
 
 # --- Button Handlers ---
-async def profile_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    # ... (your existing profile_handler function) ...
+# Correct
+async def referral_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    print("This is correctly indented!")
 
 async def referral_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     # ... (your existing referral_handler function) ...
