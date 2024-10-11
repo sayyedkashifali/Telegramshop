@@ -6,11 +6,8 @@ import threading
 import os
 
 from flask import Flask
-from telegram import (InlineKeyboardButton, InlineKeyboardMarkup, Update,
-                      ChatMember)
-from telegram.ext import (Application, CallbackQueryHandler,
-                          CommandHandler, ContextTypes, MessageHandler,
-                          filters)
+from telegram import (InlineKeyboardButton, InlineKeyboardMarkup, Update, ChatMember)
+from telegram.ext import (Application, CallbackQueryHandler, CommandHandler, ContextTypes, MessageHandler, filters)
 
 # Import the admin panel and admin user IDs from the correct module
 from admin.panel import admin_panel_conv_handler, ADMIN_USER_IDS
@@ -39,6 +36,7 @@ def index():
 # --- Check Membership ---
 async def check_membership(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # ... (your existing check_membership function code) ...
+    pass
 
 # --- Start Function ---
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -83,15 +81,19 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 # --- Button Handlers ---
 async def profile_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     # ... (your existing profile_handler function code) ...
+    pass
 
 async def referral_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     # ... (your existing referral_handler function code) ...
+    pass
 
 async def admin_panel_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     # ... (your existing admin_panel_handler function code) ...
+    pass
 
 async def deposit_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     # ... (your existing deposit_handler function code) ...
+    pass
 
 def run_flask_app():
     print("Starting Flask app...")
@@ -123,4 +125,3 @@ if __name__ == '__main__':
 
     flask_thread.start()
     bot_thread.start()
-  
