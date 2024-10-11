@@ -184,4 +184,37 @@ async def deposit_handler(update: Update,
         # Use the QR code link you provided
         qr_code_link = "https://files.catbox.moe/ef4lat.jpg"
 
-        await context.bot.send
+        await context.bot.send_photo(
+            chat_id=update.effective_chat.id,
+            photo=qr_code_link,
+            caption=
+            "Pay This QR (PayTM) and click Paid button to Go to the Next step.\nOr\nYou Can 📞 contact Our Admin And top up Your account."
+        )
+
+        # Create the "Paid" and "Admin" buttons
+        keyboard = [
+            [
+                InlineKeyboardButton("Paid", callback_data='paid'),
+                InlineKeyboardButton("Admin", url='https://t.me/Sayyed_Kashifali')
+            ]
+        ]
+        reply_markup = InlineKeyboardMarkup(keyboard)
+        await update.effective_message.reply_text(
+            "If You paid, Send us a screenshot.\n\nNote:\nIf You send Fake proofs You will be permanently banned.",
+            reply_markup=reply_markup)
+    except Exception as e:
+        logger.exception(f"An error occurred in deposit_handler: {e}")
+
+
+if __name__ == '__main__':
+    application = Application.builder().token(TOKEN).build()
+
+    # Register all the handlers
+    application.add_handler(CommandHandler("start", start))
+    application.add_handler(CallbackQueryHandler(profile_handler, pattern='profile'))
+    application.add_handler(CallbackQueryHandler(referral_handler, pattern='referral'))
+    application.add_handler(CallbackQueryHandler(admin_panel_handler, pattern='admin'))
+    application.add_handler(CallbackQueryHandler(deposit_handler, pattern='deposit'))
+
+    # Start the bot
+    application.run_polling()
