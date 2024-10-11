@@ -2,7 +2,7 @@ import asyncio
 import logging
 import os
 import random
-import threading  # Add this line
+import threading
 from datetime import datetime
 
 from flask import Flask
@@ -229,4 +229,5 @@ if __name__ == '__main__':
     flask_thread.start()
 
     # Ensure that the Telegram bot runs in the main thread to avoid event loop issues
-    asyncio.run(run_telegram_bot())
+    asyncio.get_event_loop().create_task(run_telegram_bot())
+    asyncio.get_event_loop().run_forever()
