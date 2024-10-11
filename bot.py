@@ -101,21 +101,18 @@ def run_flask_app():
     app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 8080)))
     print("Flask app started successfully!")
 
-def run_telegram_bot():
-    async def main():
-        application = Application.builder().token(TOKEN).build()
+async def run_telegram_bot():
+    application = Application.builder().token(TOKEN).build()
 
-        application.add_handler(CommandHandler("start", check_membership))
-        application.add_handler(CallbackQueryHandler(profile_handler, pattern='profile'))
-        application.add_handler(CallbackQueryHandler(free_shop_handler, pattern='free_shop'))
-        application.add_handler(CallbackQueryHandler(paid_shop_handler, pattern='paid_shop'))
-        application.add_handler(CallbackQueryHandler(referral_handler, pattern='referral'))
-        application.add_handler(CallbackQueryHandler(admin_panel_handler, pattern='admin'))
-        application.add_handler(CallbackQueryHandler(deposit_handler, pattern='deposit'))
+    application.add_handler(CommandHandler("start", check_membership))
+    application.add_handler(CallbackQueryHandler(profile_handler, pattern='profile'))
+    application.add_handler(CallbackQueryHandler(free_shop_handler, pattern='free_shop'))
+    application.add_handler(CallbackQueryHandler(paid_shop_handler, pattern='paid_shop'))
+    application.add_handler(CallbackQueryHandler(referral_handler, pattern='referral'))
+    application.add_handler(CallbackQueryHandler(admin_panel_handler, pattern='admin'))
+    application.add_handler(CallbackQueryHandler(deposit_handler, pattern='deposit'))
 
-        await application.run_polling()
-
-    asyncio.run(main())
+    await application.run_polling()
 
 # --- Main Function ---
 if __name__ == '__main__':
@@ -123,4 +120,4 @@ if __name__ == '__main__':
     flask_thread.start()
 
     # Ensure that the Telegram bot runs in the main thread to avoid event loop issues
-    run_telegram_bot()
+    asyncio.run(run_telegram_bot())
