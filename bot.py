@@ -69,56 +69,20 @@ async def check_membership(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 # --- Start Function ---
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    logger.debug("Entering start handler")
-    try:
-        user = update.effective_user
-        current_hour = datetime.now().hour
-        greeting = ""
-
-        if 5 <= current_hour < 12:
-            greeting = "Good morning 🌞"
-        elif 12 <= current_hour < 18:
-            greeting = "Good afternoon ☀️"
-        else:
-            greeting = "Good evening 🌃"
-
-        message = f"""
-        {greeting} Hey! {user.mention_html()}
-
-        This is **Flexer Premium Shop**, an advanced selling bot designed to provide you with a seamless and secure shopping experience. 
-
-        Explore our wide selection of products, easily manage your orders, and track your purchases with just a few taps. 
-        We are committed to providing you with the best possible service and ensuring your satisfaction. 
-
-        Happy shopping! 😊
-        """
-
-        keyboard = [
-            [InlineKeyboardButton("Profile", callback_data='profile'),
-             InlineKeyboardButton("Free Shop", callback_data='free_shop')],
-            [InlineKeyboardButton("Paid Shop", callback_data='paid_shop'),
-             InlineKeyboardButton("Referral System", callback_data='referral')],
-            [InlineKeyboardButton("Admin Panel", callback_data='admin'),
-             InlineKeyboardButton("Deposit", callback_data='deposit')]
-        ]
-        reply_markup = InlineKeyboardMarkup(keyboard)
-        await update.message.reply_text(message, reply_markup=reply_markup, parse_mode="HTML")
-    except Exception as e:
-        logger.exception(f"An error occurred in start: {e}")
+    # ... (your existing start function code) ...
 
 # --- Button Handlers ---
-# Correct
-async def referral_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    print("This is correctly indented!")
+async def profile_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    # ... (your existing profile_handler function code) ...
 
 async def referral_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    # ... (your existing referral_handler function) ...
+    # ... (your existing referral_handler function code) ...
 
 async def admin_panel_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    # ... (your existing admin_panel_handler function) ...
+    # ... (your existing admin_panel_handler function code) ...
 
 async def deposit_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    # ... (your existing deposit_handler function) ...
+    # ... (your existing deposit_handler function code) ...
 
 def run_flask_app():
     print("Starting Flask app...")
@@ -150,4 +114,4 @@ if __name__ == '__main__':
 
     flask_thread.start()
     bot_thread.start()
-    
+      
