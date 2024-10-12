@@ -214,4 +214,3 @@ async def deposit_handler(update: Update,
             reply_markup=reply_markup)
     except Exception as e:
         logger.exception(f"An error occurred
-      
