@@ -35,41 +35,58 @@ logger = logging.getLogger(__name__)
 # --- Flask App ---
 app = Flask(__name__)
 
+
 # --- Your Flask routes ---
 @app.route('/')
 def index():
     return "Hello from Flask!"
 
+
 # --- Check Membership ---
-async def check_membership(update: Update, context: ContextTypes.DEFAULT_TYPE):
+async def check_membership(update: Update,
+                            context: ContextTypes.DEFAULT_TYPE):
     """Checks if the user has joined the required channel."""
     logger.debug("Entering check_membership handler")
     try:
         user = update.effective_user
-        chat_member = await context.bot.get_chat_member(chat_id=REQUIRED_CHANNEL, user_id=user.id)
+        chat_member = await context.bot.get_chat_member(
+            chat_id=REQUIRED_CHANNEL, user_id=user.id)
 
-        if chat_member.status in [ChatMember.MEMBER, ChatMember.CREATOR, ChatMember.ADMINISTRATOR]:
+        if chat_member.status in [
+                ChatMember.MEMBER, ChatMember.CREATOR,
+                ChatMember.ADMINISTRATOR
+        ]:
+            # User is a member, proceed with the bot's functionality
             logger.debug("User is a member")
-            await start(update, context)
+            await start(
+                update, context)  # Call the start function here
         else:
+            # User is not a member, send a message asking them to join
             join_link = f"https://t.me/{REQUIRED_CHANNEL.removeprefix('@')}"
-            keyboard = InlineKeyboardMarkup.from_button(InlineKeyboardButton("Join Channel", url=join_link))
+            keyboard = InlineKeyboardMarkup.from_button(
+                InlineKeyboardButton("Join Channel", url=join_link))
 
+            # List of image URLs
             images = [
                 "https://files.catbox.moe/z131hg.jpg",
                 "https://files.catbox.moe/i0cepb.jpg",
-                # ... other image URLs ...
+                "https://files.catbox.moe/ahpyvy.jpg",
+                "https://files.catbox.moe/jrrfdu.jpg",
+                "https://files.catbox.moe/m92opv.jpg",
+                "https://files.catbox.moe/dt641v.jpg"
             ]
+            # Choose a random image from the list
             random_image = random.choice(images)
 
             await update.message.reply_photo(
                 photo=random_image,
-                caption=f"👋 Hey {user.mention_html()}!\n\nTo use this bot, you need to join our channel first. Click the button below to join and then press /start to start using the bot.",
+                caption=
+                f"👋 Hey {user.mention_html()}!\n\nTo use this bot, you need to join our channel first. Click the button below to join and then press /start to start using the bot.",
                 reply_markup=keyboard,
-                parse_mode="HTML"
-            )
+                parse_mode="HTML")
     except Exception as e:
         logger.exception(f"An error occurred in check_membership: {e}")
+
 
 # --- Start Function ---
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -78,6 +95,8 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     try:
         user = update.effective_user
         current_hour = datetime.now().hour
+        greeting = ""
+
         if 5 <= current_hour < 12:
             greeting = "Good morning 🌞"
         elif 12 <= current_hour < 18:
@@ -97,78 +116,86 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         """
 
         keyboard = [
-            [InlineKeyboardButton("Profile", callback_data='profile'),
-             InlineKeyboardButton("Free Shop", callback_data='free_shop')],
-            [InlineKeyboardButton("Paid Shop", callback_data='paid_shop'),
-             InlineKeyboardButton("Referral System", callback_data='referral')],
-            [InlineKeyboardButton("Admin Panel", callback_data='admin'),
-             InlineKeyboardButton("Deposit", callback_data='deposit')]
+            [
+                InlineKeyboardButton("Profile", callback_data='profile'),
+                InlineKeyboardButton("Free Shop", callback_data='free_shop')
+            ],
+            [
+                InlineKeyboardButton("Paid Shop", callback_data='paid_shop'),
+                InlineKeyboardButton("Referral System",
+                                     callback_data='referral')
+            ],
+            [
+                InlineKeyboardButton("Admin Panel", callback_data='admin'),
+                InlineKeyboardButton("Deposit", callback_data='deposit')
+            ]
         ]
         reply_markup = InlineKeyboardMarkup(keyboard)
-        await update.message.reply_text(message, reply_markup=reply_markup, parse_mode="HTML")
-
+        await update.message.reply_text(message,
+                                        reply_markup=reply_markup,
+                                        parse_mode="HTML")
     except Exception as e:
         logger.exception(f"An error occurred in start: {e}")
 
+
 # --- Button Handlers ---
-async def profile_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+async def profile_handler(update: Update,
+                          context: ContextTypes.DEFAULT_TYPE) -> None:
     """Handles the 'Profile' button."""
-    # ... (your existing profile_handler function code) ...
+    logger.debug("Entering profile_handler")
+    try:
+        user_id = update.effective_user.id
+        # Implement logic to fetch user details from the database
+        # For now, using placeholder data
+        username = "test_user"
+        transaction_count = 5
+        referral_count = 2
 
-async def referral_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+        message = f"""
+        *User ID:* {user_id}
+        *Username:* {username}
+        *Transactions:* {transaction_count}
+        *Referrals:* {referral_count}
+        """
+        await update.callback_query.message.edit_text(text=message,
+                                                      parse_mode='Markdown')
+    except Exception as e:
+        logger.exception(f"An error occurred in profile_handler: {e}")
+
+
+async def referral_handler(update: Update,
+                           context: ContextTypes.DEFAULT_TYPE) -> None:
     """Handles the 'Referral System' button."""
-    # ... (your existing referral_handler function code) ...
+    logger.debug("Entering referral_handler")
+    try:
+        user_id = update.effective_user.id
+        referral_link = f"https://t.me/your_bot?start={user_id}"  # Replace with your actual bot username
+        message = f"Share this link to invite others: {referral_link}"
+        await update.callback_query.message.edit_text(text=message)
+    except Exception as e:
+        logger.exception(f"An error occurred in referral_handler: {e}")
 
-async def admin_panel_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+
+async def admin_panel_handler(update: Update,
+                              context: ContextTypes.DEFAULT_TYPE) -> None:
     """Handles the 'Admin Panel' button."""
-    # ... (your existing admin_panel_handler function code) ...
+    logger.debug("Entering admin_panel_handler")
+    try:
+        await admin_panel_conv_handler(
+            update, context)  # Using the correct variable name
+    except Exception as e:
+        logger.exception(f"An error occurred in admin_panel_handler: {e}")
 
-async def deposit_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+
+async def deposit_handler(update: Update,
+                          context: ContextTypes.DEFAULT_TYPE) -> None:
     """Handles the 'Deposit' button."""
-    # ... (your existing deposit_handler function code) ...
-
-def run_flask_app():
-    print("Starting Flask app...")
-    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 8080)), debug=False)  # Disable debug mode for production
-    print("Flask app started successfully!")
-
-def run_telegram_bot():
-    """
-    This function is responsible for setting up and running the Telegram bot.
-    It creates an Application instance, registers the necessary handlers, and starts the polling loop to receive updates from Telegram.
-    """
-    # Use ApplicationBuilder to create the application
-    application = (
-        ApplicationBuilder()
-        .token(TOKEN)
-        .post_init(post_init)  # Call post_init after the bot is initialized
-        .build()
-    )
-
-    application.add_handler(CommandHandler("start", check_membership))
-    application.add_handler(CallbackQueryHandler(profile_handler, pattern='profile'))
-    application.add_handler(CallbackQueryHandler(free_shop_handler, pattern='free_shop'))
-    application.add_handler(CallbackQueryHandler(paid_shop_handler, pattern='paid_shop'))
-    application.add_handler(CallbackQueryHandler(referral_handler, pattern='referral'))
-    application.add_handler(CallbackQueryHandler(admin_panel_handler, pattern='admin'))
-    application.add_handler(CallbackQueryHandler(deposit_handler, pattern='deposit'))
-
-    # Create a new event loop for the thread
-    loop = asyncio.new_event_loop()
-    asyncio.set_event_loop(loop)
-
-    # Run the bot in the new event loop
-    loop.run_until_complete(application.run_polling())
-
-async def post_init(application: Application) -> None:
-    await application.bot.set_my_commands([("start", "Start the bot")])
-
-# --- Main Function ---
-if __name__ == '__main__':
-    # Create and start threads for Flask and Telegram bot
-    flask_thread = threading.Thread(target=run_flask_app)
-    bot_thread = threading.Thread(target=run_telegram_bot)
-
-    flask_thread.start()
-    bot_thread.start()
-    
+    logger.debug("Entering deposit_handler")
+    try:
+        # Replace 'qr_code.png' with the actual path to your QR code image
+        with open('qr_code.png', 'rb') as qr_code_file:
+            await context.bot.send_photo(
+                chat_id=update.effective_chat.id,
+                photo=qr_code_file,
+                caption
+              
