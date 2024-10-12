@@ -4,11 +4,8 @@ import os
 import random
 from datetime import datetime
 from flask import Flask
-from telegram import (ChatMember, InlineKeyboardButton, InlineKeyboardMarkup,
-                      Update)
-from telegram.ext import (Application, ApplicationBuilder,
-                          CallbackQueryHandler, CommandHandler,
-                          ContextTypes, MessageHandler, filters)
+from telegram import (ChatMember, InlineKeyboardButton, InlineKeyboardMarkup, Update)
+from telegram.ext import (Application, ApplicationBuilder, CallbackQueryHandler, CommandHandler, ContextTypes, MessageHandler, filters)
 import threading  # For running Flask and bot concurrently
 
 # --- Bot Token ---
@@ -33,19 +30,14 @@ def index():
     return "Hello from Flask!"
 
 # --- Check Membership ---
-async def check_membership(update: Update,
-                           context: ContextTypes.DEFAULT_TYPE):
+async def check_membership(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Checks if the user has joined the required channel."""
     logger.debug("Entering check_membership handler")
     try:
         user = update.effective_user
-        chat_member = await context.bot.get_chat_member(
-            chat_id=REQUIRED_CHANNEL, user_id=user.id)
+        chat_member = await context.bot.get_chat_member(chat_id=REQUIRED_CHANNEL, user_id=user.id)
 
-        if chat_member.status in [
-                ChatMember.MEMBER, ChatMember.CREATOR,
-                ChatMember.ADMINISTRATOR
-        ]:
+        if chat_member.status in [ChatMember.MEMBER, ChatMember.CREATOR, ChatMember.ADMINISTRATOR]:
             # User is a member, proceed with the bot's functionality
             logger.debug("User is a member")
             await start(update, context)
@@ -69,8 +61,7 @@ async def check_membership(update: Update,
 
             await update.message.reply_photo(
                 photo=random_image,
-                caption=
-                f"👋 Hey {user.mention_html()}!\n\nTo use this bot, you need to join our channel first. Click the button below to join and then press /start to start using the bot.",
+                caption=f"👋 Hey {user.mention_html()}!\n\nTo use this bot, you need to join our channel first. Click the button below to join and then press /start to start using the bot.",
                 reply_markup=keyboard,
                 parse_mode="HTML")
     except Exception as e:
@@ -112,8 +103,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
             ],
             [
                 InlineKeyboardButton("Paid Shop", callback_data='paid_shop'),
-                InlineKeyboardButton("Referral System",
-                                     callback_data='referral')
+                InlineKeyboardButton("Referral System", callback_data='referral')
             ],
             [
                 InlineKeyboardButton("Admin Panel", callback_data='admin'),
@@ -121,9 +111,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
             ]
         ]
         reply_markup = InlineKeyboardMarkup(keyboard)
-        await update.message.reply_text(message,
-                                        reply_markup=reply_markup,
-                                        parse_mode="HTML")
+        await update.message.reply_text(message, reply_markup=reply_markup, parse_mode="HTML")
     except Exception as e:
         logger.exception(f"An error occurred in start: {e}")
 
@@ -150,8 +138,7 @@ async def send_random_image(update: Update, context: ContextTypes.DEFAULT_TYPE) 
     except Exception as e:
         logger.exception(f"An error occurred in send_random_image: {e}")
 
-async def profile_handler(update: Update,
-                          context: ContextTypes.DEFAULT_TYPE) -> None:
+async def profile_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Handles the 'Profile' button."""
     logger.debug("Entering profile_handler")
     try:
@@ -169,13 +156,11 @@ async def profile_handler(update: Update,
         *Transactions:* {transaction_count}
         *Referrals:* {referral_count}
         """
-        await update.callback_query.message.edit_text(text=message,
-                                                      parse_mode='Markdown')
+        await update.callback_query.message.edit_text(text=message, parse_mode='Markdown')
     except Exception as e:
         logger.exception(f"An error occurred in profile_handler: {e}")
 
-async def referral_handler(update: Update,
-                           context: ContextTypes.DEFAULT_TYPE) -> None:
+async def referral_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Handles the 'Referral System' button."""
     logger.debug("Entering referral_handler")
     try:
@@ -189,8 +174,7 @@ async def referral_handler(update: Update,
     except Exception as e:
         logger.exception(f"An error occurred in referral_handler: {e}")
 
-async def admin_panel_handler(update: Update,
-                              context: ContextTypes.DEFAULT_TYPE) -> None:
+async def admin_panel_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Handles the 'Admin Panel' button."""
     logger.debug("Entering admin_panel_handler")
     try:
@@ -199,8 +183,7 @@ async def admin_panel_handler(update: Update,
     except Exception as e:
         logger.exception(f"An error occurred in admin_panel_handler: {e}")
 
-async def deposit_handler(update: Update,
-                          context: ContextTypes.DEFAULT_TYPE) -> None:
+async def deposit_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Handles the 'Deposit' button."""
     logger.debug("Entering deposit_handler")
     try:
@@ -229,3 +212,5 @@ async def deposit_handler(update: Update,
         logger.exception(f"An error occurred in deposit_handler: {e}")
 
 # --- Run the Flask app on port 8080 ---
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=8080)
