@@ -210,7 +210,3 @@ async def deposit_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
             reply_markup=reply_markup)
     except Exception as e:
         logger.exception(f"An error occurred in deposit_handler: {e}")
-
-# --- Run the Flask app on port 8080 ---
-if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=8080)
