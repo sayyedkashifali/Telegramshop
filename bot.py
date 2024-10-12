@@ -168,7 +168,7 @@ async def referral_handler(update: Update,
     logger.debug("Entering referral_handler")
     try:
         user_id = update.effective_user.id
-        referral_link = f"https://t.me/your_bot?start={user_id}"  # Replace with your actual bot username
+        referral_link = f"https://t.me/NchXFlexerBot?start={user_id}"  # Replace with your actual bot username
         message = f"Share this link to invite others: {referral_link}"
         await update.callback_query.message.edit_text(text=message)
     except Exception as e:
@@ -212,4 +212,4 @@ async def deposit_handler(update: Update,
             "If You paid, Send us a screenshot.\n\nNote:\nIf You send Fake proofs You will be permanently banned.",
             reply_markup=reply_markup)
     except Exception as e:
-        logger.exception(f"An
+        logger.exception(f"An error occurred in deposit_handler: {e}")
