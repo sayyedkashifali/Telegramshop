@@ -186,7 +186,6 @@ async def admin_panel_handler(update: Update,
     except Exception as e:
         logger.exception(f"An error occurred in admin_panel_handler: {e}")
 
-
 async def deposit_handler(update: Update,
                           context: ContextTypes.DEFAULT_TYPE) -> None:
     """Handles the 'Deposit' button."""
@@ -197,5 +196,12 @@ async def deposit_handler(update: Update,
             await context.bot.send_photo(
                 chat_id=update.effective_chat.id,
                 photo=qr_code_file,
-                caption
-              
+                caption=
+                "Pay This QR (PayTM) and click Paid button to Go to the Next step.\nOr\nYou Can 📞 contact Our Admin And top up Your account."
+            )  # Closing parenthesis added here
+
+        # ... rest of your deposit_handler code ...
+
+    except Exception as e:
+        logger.exception(f"An error occurred in deposit_handler: {e}")
+      
