@@ -186,7 +186,6 @@ async def admin_panel_handler(update: Update,
     except Exception as e:
         logger.exception(f"An error occurred in admin_panel_handler: {e}")
 
-
 async def deposit_handler(update: Update,
                           context: ContextTypes.DEFAULT_TYPE) -> None:
     """Handles the 'Deposit' button."""
@@ -197,20 +196,15 @@ async def deposit_handler(update: Update,
             await context.bot.send_photo(
                 chat_id=update.effective_chat.id,
                 photo=qr_code_file,
-                caption=
-                "Pay This QR (PayTM) and click Paid button to Go to the Next step.\nOr\nYou Can 📞 contact Our Admin And top up Your account."
-            )
+                caption="Pay This QR (PayTM) and click Paid button to Go to the Next step.\nOr\nYou Can 📞 contact Our Admin And top up Your account."
+            )  # Closing parenthesis added here
 
-        # Create the "Paid" and "Admin" buttons
-        keyboard = [
-            [
-                InlineKeyboardButton("Paid", callback_data='paid'),
-                InlineKeyboardButton("Admin", url='https://t.me/Sayyed_Kashifali')
-            ]
-        ]
-        reply_markup = InlineKeyboardMarkup(keyboard)
-        await update.effective_message.reply_text(
-            "If You paid, Send us a screenshot.\n\nNote:\nIf You send Fake proofs You will be permanently banned.",
-            reply_markup=reply_markup)
+        # ... rest of your deposit_handler code ...
+
     except Exception as e:
-        logger.exception(f"An error occurred
+        logger.exception(f"An error occurred in deposit_handler: {e}")
+
+
+# --- Run the Flask app on port 8080 ---
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=8080) 
