@@ -34,127 +34,98 @@ logger = logging.getLogger(__name__)
 # --- Flask App ---
 app = Flask(__name__)
 
+
 # --- Your Flask routes ---
 @app.route('/')
 def index():
     return "Hello from Flask!"
 
+
 # --- Check Membership ---
-async def check_membership(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """Checks if the user has joined the required channel."""
-    logger.debug("Entering check_membership handler")
-    try:
-        user = update.effective_user
-        chat_member = await context.bot.get_chat_member(chat_id=REQUIRED_CHANNEL, user_id=user.id)
+async def check_membership(update: Update,
+                            context: ContextTypes.DEFAULT_TYPE):
+    # ... (your existing check_membership function code) ...
 
-        if chat_member.status in [ChatMember.MEMBER, ChatMember.CREATOR, ChatMember.ADMINISTRATOR]:
-            logger.debug("User is a member")
-            await start(update, context)
-        else:
-            join_link = f"https://t.me/{REQUIRED_CHANNEL.removeprefix('@')}"
-            keyboard = InlineKeyboardMarkup.from_button(InlineKeyboardButton("Join Channel", url=join_link))
-
-            images = [
-                "https://files.catbox.moe/z131hg.jpg",
-                "https://files.catbox.moe/i0cepb.jpg",
-                # ... other image URLs ...
-            ]
-            random_image = random.choice(images)
-
-            await update.message.reply_photo(
-                photo=random_image,
-                caption=f"👋 Hey {user.mention_html()}!\n\nTo use this bot, you need to join our channel first. Click the button below to join and then press /start to start using the bot.",
-                reply_markup=keyboard,
-                parse_mode="HTML"
-            )
-    except Exception as e:
-        logger.exception(f"An error occurred in check_membership: {e}")
 
 # --- Start Function ---
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    """Handles the /start command."""
-    logger.debug("Entering start handler")
-    try:
-        user = update.effective_user
-        current_hour = datetime.now().hour
-        if 5 <= current_hour < 12:
-            greeting = "Good morning 🌞"
-        elif 12 <= current_hour < 18:
-            greeting = "Good afternoon ☀️"
-        else:
-            greeting = "Good evening 🌃"
+    # ... (your existing start function code) ...
 
-        message = f"""
-        {greeting} Hey! {user.mention_html()}
-
-        This is **Flexer Premium Shop**, an advanced selling bot designed to provide you with a seamless and secure shopping experience. 
-
-        Explore our wide selection of products, easily manage your orders, and track your purchases with just a few taps. 
-        We are committed to providing you with the best possible service and ensuring your satisfaction. 
-
-        Happy shopping! 😊
-        """
-
-        keyboard = [
-            [InlineKeyboardButton("Profile", callback_data='profile'),
-             InlineKeyboardButton("Free Shop", callback_data='free_shop')],
-            [InlineKeyboardButton("Paid Shop", callback_data='paid_shop'),
-             InlineKeyboardButton("Referral System", callback_data='referral')],
-            [InlineKeyboardButton("Admin Panel", callback_data='admin'),
-             InlineKeyboardButton("Deposit", callback_data='deposit')]
-        ]
-        reply_markup = InlineKeyboardMarkup(keyboard)
-        await update.message.reply_text(message, reply_markup=reply_markup, parse_mode="HTML")
-
-    except Exception as e:
-        logger.exception(f"An error occurred in start: {e}")
 
 # --- Button Handlers ---
-async def profile_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    """Handles the 'Profile' button."""
+async def profile_handler(update: Update,
+                          context: ContextTypes.DEFAULT_TYPE) -> None:
     # ... (your existing profile_handler function code) ...
 
-async def referral_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    """Handles the 'Referral System' button."""
+
+async def referral_handler(update: Update,
+                           context: ContextTypes.DEFAULT_TYPE) -> None:
     # ... (your existing referral_handler function code) ...
 
-async def admin_panel_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    """Handles the 'Admin Panel' button."""
+
+async def admin_panel_handler(update: Update,
+                              context: ContextTypes.DEFAULT_TYPE) -> None:
     # ... (your existing admin_panel_handler function code) ...
 
-async def deposit_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    """Handles the 'Deposit' button."""
+
+async def deposit_handler(update: Update,
+                          context: ContextTypes.DEFAULT_TYPE) -> None:
     # ... (your existing deposit_handler function code) ...
+
 
 # --- Define a main function ---
 def main():
     """
-    This function is responsible for setting up and running the Telegram bot.
-    It creates an Application instance, registers the necessary handlers, and starts the polling loop to receive updates from Telegram.
+    This function is responsible for setting up and running both the Flask app and the Telegram bot
+    within the same asyncio event loop.
     """
     # Use ApplicationBuilder to create the application
     application = (
-        ApplicationBuilder()
-        .token(TOKEN)
-        .post_init(post_init)
-        .build()
-    )
+        ApplicationBuilder().token(TOKEN).post_init(post_init).build())
 
     application.add_handler(CommandHandler("start", check_membership))
-    application.add_handler(CallbackQueryHandler(profile_handler, pattern='profile'))
-    application.add_handler(CallbackQueryHandler(free_shop_handler, pattern='free_shop'))
-    application.add_handler(CallbackQueryHandler(paid_shop_handler, pattern='paid_shop'))
-    application.add_handler(CallbackQueryHandler(referral_handler, pattern='referral'))
-    application.add_handler(CallbackQueryHandler(admin_panel_handler, pattern='admin'))
-    application.add_handler(CallbackQueryHandler(deposit_handler, pattern='deposit'))
+    application.add_handler(
+        CallbackQueryHandler(profile_handler, pattern='profile'))
+    application.add_handler(
+        CallbackQueryHandler(free_shop_handler, pattern='free_shop'))
+    application.add_handler(
+        CallbackQueryHandler(paid_shop_handler, pattern='paid_shop'))
+    application.add_handler(
+        CallbackQueryHandler(referral_handler, pattern='referral'))
+    application.add_handler(
+        CallbackQueryHandler(admin_panel_handler, pattern='admin'))
+    application.add_handler(
+        CallbackQueryHandler(deposit_handler, pattern='deposit'))
 
-    # Run the bot in the event loop
-    application.run_polling()
+    # --- Run Flask and Telegram bot concurrently ---
+    async def run_app():
+        # Start the Telegram bot
+        loop.create_task(application.run_polling())
+
+        # Start the Flask app
+        print("Starting Flask app...")
+        app.run(host="0.0.0.0",
+                port=int(os.environ.get("PORT", 8080)),
+                debug=False)  # Disable debug mode for production
+        print("Flask app started successfully!")
+
+    # Get the current event loop
+    loop = asyncio.get_event_loop()
+
+    # Run the app in the event loop
+    try:
+        loop.run_until_complete(run_app())
+    except KeyboardInterrupt:
+        pass
+    finally:
+        loop.close()
+
 
 async def post_init(application: Application) -> None:
     await application.bot.set_my_commands([("start", "Start the bot")])
 
+
 # --- Run the main function if the script is executed ---
 if __name__ == '__main__':
     main()
-    
+  
