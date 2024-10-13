@@ -2,10 +2,9 @@ import os
 import logging
 import random
 from datetime import datetime
-
 from flask import Flask, request, abort
 from telegram import (ChatMember, InlineKeyboardButton, InlineKeyboardMarkup, Update)
-from telegram.ext import (Dispatcher, CommandHandler, CallbackQueryHandler, ContextTypes)
+from telegram.ext import (Application, ApplicationBuilder, CommandHandler, CallbackQueryHandler, ContextTypes)
 
 # Importing admin and shop handlers
 from admin.panel import admin_panel_conv_handler
@@ -17,7 +16,7 @@ TOKEN = os.environ.get("BOT_TOKEN")
 
 # --- Other settings ---
 REQUIRED_CHANNEL = "@igdealsbykashif"
-LOG_CHANNEL_ID = "-1002429063387"  # Your log channel ID
+LOG_CHANNEL_ID = "-1002429063387"
 
 # Configure logging
 logging.basicConfig(
@@ -29,8 +28,10 @@ logger = logging.getLogger(__name__)
 # --- Flask App ---
 app = Flask(__name__)
 
-# --- Telegram Bot Dispatcher ---
-dispatcher = Dispatcher(bot=None, update_queue=None, use_context=True)
+# --- Your Flask routes ---
+@app.route('/')
+def index():
+    return "Hello from Flask!"
 
 # --- Check Membership ---
 async def check_membership(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -124,7 +125,6 @@ async def deposit_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
     """Handles the 'Deposit' button."""
     logger.debug("Entering deposit_handler")
     try:
-        # Replace 'qr_code.png' with the actual path to your QR code image
         with open('qr_code.png', 'rb') as qr_code_file:
             await context.bot.send_photo(
                 chat_id=update.effective_chat.id,
@@ -151,7 +151,6 @@ async def free_shop_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) 
     """Handles the 'Free Shop' button."""
     logger.debug("Entering free_shop_handler")
     try:
-        # Implement the logic for the free shop
         await update.callback_query.message.edit_text("Welcome to the Free Shop!")
     except Exception as e:
         logger.exception(f"Error in free_shop_handler: {e}")
@@ -161,7 +160,6 @@ async def paid_shop_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) 
     """Handles the 'Paid Shop' button."""
     logger.debug("Entering paid_shop_handler")
     try:
-        # Implement the logic for the paid shop
         await update.callback_query.message.edit_text("Welcome to the Paid Shop!")
     except Exception as e:
         logger.exception(f"Error in paid_shop_handler: {e}")
@@ -171,7 +169,6 @@ async def admin_panel_handler(update: Update, context: ContextTypes.DEFAULT_TYPE
     """Handles the 'Admin Panel' button."""
     logger.debug("Entering admin_panel_handler")
     try:
-        # Pass the update to the admin panel conversation handler
         await admin_panel_conv_handler.process_update(update, context)
     except Exception as e:
         logger.exception(f"Error in admin_panel_handler: {e}")
@@ -198,26 +195,27 @@ def setup_dispatcher():
     from telegram import Bot
 
     bot = Bot(token=TOKEN)
-    dispatcher.bot = bot
+    application = ApplicationBuilder().token(TOKEN).build()
 
     # Add handlers
-    dispatcher.add_handler(CommandHandler("start", check_membership))
-    dispatcher.add_handler(CallbackQueryHandler(admin_panel_handler, pattern="^admin$"))
-    dispatcher.add_handler(CallbackQueryHandler(free_shop_handler, pattern="^free_shop$"))
-    dispatcher.add_handler(CallbackQueryHandler(paid_shop_handler, pattern="^paid_shop$"))
-    dispatcher.add_handler(CallbackQueryHandler(referral_system_handler, pattern="^referral$"))
-    dispatcher.add_handler(CallbackQueryHandler(deposit_handler, pattern="^deposit$"))
+    application.add_handler(CommandHandler("start", check_membership))
+    application.add_handler(CallbackQueryHandler(admin_panel_handler, pattern="^admin$"))
+    application.add_handler(CallbackQueryHandler(free_shop_handler, pattern="^free_shop$"))
+    application.add_handler(CallbackQueryHandler(paid_shop_handler, pattern="^paid_shop$"))
+    application.add_handler(CallbackQueryHandler(referral_system_handler, pattern="^referral$"))
+    application.add_handler(CallbackQueryHandler(deposit_handler, pattern="^deposit$"))
 
     # Add admin conversation handler
-    dispatcher.add_handler(admin_panel_conv_handler)
+    application.add_handler(admin_panel_conv_handler)
+
+    return application
 
 # --- Set Webhook ---
-def set_webhook():
+def set_webhook(application):
     """Sets the Telegram webhook."""
-    webhook_url = os.environ.get('https://api.telegram.org/bot8085073135:AAEpv0Vt56MPYpYAVmyjwmwUvGBcUFIzs6E/setWebhook?url=https://final-hester-notcrazyhuman-94126448.koyeb.app/')  # e.g., https://your-koyeb-app.koyeb.app/webhook/<token>
-    bot = dispatcher.bot
+    webhook_url = os.environ.get('WEBHOOK_URL')  # e.g., https://your-koyeb-app.koyeb.app/webhook/<token>
     if webhook_url:
-        success = bot.set_webhook(webhook_url)
+        success = application.bot.set_webhook(webhook_url)
         if success:
             logger.info(f"Webhook set to {webhook_url}")
         else:
@@ -227,8 +225,8 @@ def set_webhook():
 
 # --- Initialize App ---
 if __name__ == "__main__":
-    setup_dispatcher()
-    set_webhook()
+    application = setup_dispatcher()
+    set_webhook(application)
     # Run Flask app
     port = int(os.environ.get('PORT', 8080))
     app.run(host='0.0.0.0', port=port)
