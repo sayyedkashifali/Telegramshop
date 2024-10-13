@@ -1,6 +1,6 @@
-python-telegram-bot==20.0
-Flask==2.1.1
-gunicorn==20.1.0
-pymongo==4.1.1
-requests==2.27.1
-Werkzeug==2.0.3
+python-telegram-bot
+Flask
+gunicorn
+pymongo
+requests
+Werkzeug
