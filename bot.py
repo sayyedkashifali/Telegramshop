@@ -18,24 +18,40 @@ TOKEN = os.environ.get("BOT_TOKEN")
 REQUIRED_CHANNEL = "@igdealsbykashif"
 LOG_CHANNEL_ID = "-1002429063387"
 
-# Configure logging
-logging.basicConfig(
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-    level=logging.DEBUG  # Set to DEBUG for more detailed logs
-)
-logger = logging.getLogger(__name__)
-
 # --- Flask App ---
 app = Flask(__name__)
 
-# --- Your Flask routes ---
+# Configure logging
+logging.basicConfig(
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+    level=logging.DEBUG  # DEBUG level for detailed logs
+)
+logger = logging.getLogger(__name__)
+
+# --- Webhook Route for Telegram ---
 @app.route('/')
 def index():
-    return "Hello from Sir! Kashif"
+    """Test route to ensure server is running."""
+    return "Hello from Sir! Kashif's Bot is running!"
 
-# --- Check Membership ---
+@app.route('/webhook/<token>', methods=['POST'])
+def webhook_handler(token):
+    """Handles incoming webhook updates from Telegram."""
+    if token != TOKEN:
+        logger.warning("Invalid webhook token")
+        abort(403)
+    try:
+        update = Update.de_json(request.get_json(force=True), application.bot)
+        application.update_queue.put(update)
+        return "OK", 200
+    except Exception as e:
+        logger.exception(f"Error processing webhook: {e}")
+        return "Internal Server Error", 500
+
+
+# --- Check Membership Function ---
 async def check_membership(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """Checks if the user has joined the required channel."""
+    """Check if the user is a member of the required channel."""
     logger.debug("Entering check_membership handler")
     try:
         user = update.effective_user
@@ -43,10 +59,12 @@ async def check_membership(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
         if chat_member.status in [ChatMember.MEMBER, ChatMember.CREATOR, ChatMember.ADMINISTRATOR]:
             logger.debug("User is a member")
-            await start(update, context)  # Call start if user is a member
+            await start(update, context)
         else:
             join_link = f"https://t.me/{REQUIRED_CHANNEL.removeprefix('@')}"
-            keyboard = InlineKeyboardMarkup.from_button(InlineKeyboardButton("Join Channel", url=join_link))
+            keyboard = InlineKeyboardMarkup.from_button(
+                InlineKeyboardButton("Join Channel", url=join_link)
+            )
 
             images = [
                 "https://files.catbox.moe/z131hg.jpg",
@@ -62,7 +80,7 @@ async def check_membership(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 photo=random_image,
                 caption=(
                     f"👋 Hey {user.mention_html()}!\n\nTo use this bot, you need to join our channel first. "
-                    "Click the button below to join and then press /start to start using the bot."
+                    "Click the button below to join and then press /start to begin using the bot."
                 ),
                 reply_markup=keyboard,
                 parse_mode="HTML"
@@ -70,7 +88,7 @@ async def check_membership(update: Update, context: ContextTypes.DEFAULT_TYPE):
     except Exception as e:
         logger.exception(f"Error in check_membership: {e}")
 
-# --- Start Function ---
+# --- Start Command Handler ---
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Handles the /start command."""
     logger.debug("Entering start handler")
@@ -85,7 +103,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         message = f"""
         {greeting} Hey! {user.mention_html()}
 
-        Welcome to **Flexer Premium Shop** - Your one-stop shop for exclusive deals and premium products. 
+        Welcome to **Flexer Premium Shop** - Your one-stop shop for exclusive deals and premium products.
 
         Explore a wide selection of items, manage your orders, and track purchases with ease. We prioritize your satisfaction and a seamless shopping experience.
 
@@ -173,22 +191,6 @@ async def admin_panel_handler(update: Update, context: ContextTypes.DEFAULT_TYPE
     except Exception as e:
         logger.exception(f"Error in admin_panel_handler: {e}")
 
-# --- Webhook Route ---
-@app.route('/webhook/<token>', methods=['POST'])
-def webhook_handler(token):
-    """Handles incoming webhook updates from Telegram."""
-    if token != TOKEN:
-        logger.warning("Invalid webhook token")
-        abort(403)
-
-    try:
-        update = Update.de_json(request.get_json(force=True), bot=application.bot)
-        application.update_queue.put(update)
-        return "OK", 200
-    except Exception as e:
-        logger.exception(f"Error processing webhook: {e}")
-        return "Internal Server Error", 500
-
 # --- Setup Dispatcher ---
 def setup_dispatcher():
     """Sets up the Telegram dispatcher with handlers."""
@@ -197,7 +199,7 @@ def setup_dispatcher():
     bot = Bot(token=TOKEN)
     application = ApplicationBuilder().token(TOKEN).build()
 
-    # Add handlers
+    # Add command handlers
     application.add_handler(CommandHandler("start", check_membership))
     application.add_handler(CallbackQueryHandler(admin_panel_handler, pattern="^admin$"))
     application.add_handler(CallbackQueryHandler(free_shop_handler, pattern="^free_shop$"))
@@ -213,7 +215,7 @@ def setup_dispatcher():
 # --- Set Webhook ---
 def set_webhook(application):
     """Sets the Telegram webhook."""
-    webhook_url = "https://api.telegram.org/bot8085073135:AAEpv0Vt56MPYpYAVmyjwmwUvGBcUFIzs6E/setWebhook?url=https://final-hester-notcrazyhuman-94126448.koyeb.app/webhook"
+    webhook_url = f"curl -F "url=https://final-hester-notcrazyhuman-94126448.koyeb.app/" https://api.telegram.org/bot8085073135:AAEpv0Vt56MPYpYAVmyjwmwUvGBcUFIzs6E/setWebhook"
     if webhook_url:
         success = application.bot.set_webhook(webhook_url)
         if success:
@@ -221,12 +223,13 @@ def set_webhook(application):
         else:
             logger.error("Failed to set webhook")
     else:
-        logger.error("WEBHOOK_URL not set in environment variables.")
+        logger.error("Webhook URL not set properly.")
 
-# --- Initialize App ---
+# --- Initialize Application ---
 if __name__ == "__main__":
     application = setup_dispatcher()
     set_webhook(application)
+
     # Run Flask app
     port = int(os.environ.get('PORT', 8080))
     app.run(host='0.0.0.0', port=port)
