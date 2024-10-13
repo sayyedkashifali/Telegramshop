@@ -31,7 +31,7 @@ app = Flask(__name__)
 # --- Your Flask routes ---
 @app.route('/')
 def index():
-    return "Hello from Flask!"
+    return "Hello from Sir! Kashif"
 
 # --- Check Membership ---
 async def check_membership(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -213,7 +213,7 @@ def setup_dispatcher():
 # --- Set Webhook ---
 def set_webhook(application):
     """Sets the Telegram webhook."""
-    webhook_url = os.environ.get('curl -F "url=https://final-hester-notcrazyhuman-94126448.koyeb.app/" https://api.telegram.org/bot<YOUR_BOT_TOKEN>/setWebhook')  # e.g., https://your-koyeb-app.koyeb.app/webhook/<token>
+    webhook_url = os.environ.get('https://api.telegram.org/bot8085073135:AAEpv0Vt56MPYpYAVmyjwmwUvGBcUFIzs6E/setWebhook?url=https://final-hester-notcrazyhuman-94126448.koyeb.app/')  # e.g., https://your-koyeb-app.koyeb.app/webhook/<token>
     if webhook_url:
         success = application.bot.set_webhook(webhook_url)
         if success:
