@@ -182,8 +182,8 @@ def webhook_handler(token):
         abort(403)
 
     try:
-        update = Update.de_json(request.get_json(force=True), bot=dispatcher.bot)
-        dispatcher.process_update(update)
+        update = Update.de_json(request.get_json(force=True), bot=application.bot)
+        application.update_queue.put(update)
         return "OK", 200
     except Exception as e:
         logger.exception(f"Error processing webhook: {e}")
@@ -213,7 +213,7 @@ def setup_dispatcher():
 # --- Set Webhook ---
 def set_webhook(application):
     """Sets the Telegram webhook."""
-    webhook_url = os.environ.get('https://api.telegram.org/bot8085073135:AAEpv0Vt56MPYpYAVmyjwmwUvGBcUFIzs6E/setWebhook?url=https://final-hester-notcrazyhuman-94126448.koyeb.app/')  # e.g., https://your-koyeb-app.koyeb.app/webhook/<token>
+    webhook_url = "https://final-hester-notcrazyhuman-94126448.koyeb.app/"
     if webhook_url:
         success = application.bot.set_webhook(webhook_url)
         if success:
