@@ -196,8 +196,7 @@ async def deposit_handler(update: Update,
             await context.bot.send_photo(
                 chat_id=update.effective_chat.id,
                 photo=qr_code_file,
-                caption=
-                "Pay This QR (PayTM) and click Paid button to Go to the Next step.\nOr\nYou Can 📞 contact Our Admin And top up Your account."
+                caption="Pay This QR (PayTM) and click Paid button to Go to the Next step.\nOr\nYou Can 📞 contact Our Admin And top up Your account."
             )
 
         # Create the "Paid" and "Admin" buttons
@@ -212,5 +211,4 @@ async def deposit_handler(update: Update,
             "If You paid, Send us a screenshot.\n\nNote:\nIf You send Fake proofs You will be permanently banned.",
             reply_markup=reply_markup)
     except Exception as e:
-        logger.exception(f"An error occurred in deposit_
-        
+        logger.exception(f"An error occurred in deposit_handler: {e}")
