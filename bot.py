@@ -1,4 +1,4 @@
-limport asyncio
+import asyncio
 import logging
 import os
 import random
@@ -23,7 +23,7 @@ LOG_CHANNEL_ID = "-1002429063387"  # Your log channel ID
 
 # Configure logging
 logging.basicConfig(
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+    format="%(asctime)s - %(name)s - %(levellevel)s - %(message)s",
     level=logging.DEBUG)  # Set to DEBUG for more detailed logs
 logger = logging.getLogger(__name__)
 
