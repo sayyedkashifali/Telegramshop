@@ -197,5 +197,11 @@ async def deposit_handler(update: Update,
                 chat_id=update.effective_chat.id,
                 photo=qr_code_file,
                 caption=
-                "Pay This QR (PayTM) and click Paid button to Go to the Next step.\nOr\nYou Can 📞 contact Our Admin And
-                
+                "Pay This QR (PayTM) and click Paid button to Go to the Next step.\nOr\nYou Can 📞 contact Our Admin And top up Your account."
+            )
+
+        # ... rest of your deposit_handler code ...
+
+    except Exception as e:
+        logger.exception(f"An error occurred in deposit_handler: {e}")
+      
