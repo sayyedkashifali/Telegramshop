@@ -1,9 +1,8 @@
 import os
 import logging
 import random
-import asyncio
 from datetime import datetime
-from flask import Flask, request, abort
+from flask import Flask
 from telegram import (ChatMember, InlineKeyboardButton, InlineKeyboardMarkup, Update)
 from telegram.ext import (Application, ApplicationBuilder, CommandHandler, CallbackQueryHandler, ContextTypes)
 
@@ -29,25 +28,11 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-# --- Webhook Route for Telegram ---
+# --- Test Route ---
 @app.route('/')
 def index():
     """Test route to ensure server is running."""
     return "Hello from Sir! Kashif's Bot is running!"
-
-@app.route('/webhook/<token>', methods=['POST'])
-def webhook_handler(token):
-    """Handles incoming webhook updates from Telegram."""
-    if token != TOKEN:
-        logger.warning("Invalid webhook token")
-        abort(403)
-    try:
-        update = Update.de_json(request.get_json(force=True), application.bot)
-        application.update_queue.put(update)
-        return "OK", 200
-    except Exception as e:
-        logger.exception(f"Error processing webhook: {e}")
-        return "Internal Server Error", 500
 
 # --- Check Membership Function ---
 async def check_membership(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -211,23 +196,9 @@ def setup_dispatcher():
 
     return application
 
-# --- Set Webhook ---
-async def set_webhook(application):
-    """Sets the Telegram webhook."""
-    webhook_url = "https://final-hester-notcrazyhuman-94126448.koyeb.app/"
-    if webhook_url:
-        success = await application.bot.set_webhook(webhook_url)
-        if success:
-            logger.info(f"Webhook set to {webhook_url}")
-        else:
-            logger.error("Failed to set webhook")
-    else:
-        logger.error("WEBHOOK_URL not set properly.")
-
 # --- Initialize Application ---
 if __name__ == "__main__":
     application = setup_dispatcher()
-    asyncio.run(set_webhook(application))
 
     # Run Flask app
     port = int(os.environ.get('PORT', 8080))
