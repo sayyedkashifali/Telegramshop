@@ -1,10 +1,11 @@
 import os
 import logging
 import random
+import asyncio
 from datetime import datetime
 from flask import Flask, request, abort
-from telegram import (ChatMember, InlineKeyboardButton, InlineKeyboardMarkup, Update)
-from telegram.ext import (Application, ApplicationBuilder, CommandHandler, CallbackQueryHandler, ContextTypes)
+from telegram import (ChatMember, InlineKeyboardButton, InlineKeyboardMarkup, Update, Poll, PollOption)
+from telegram.ext import (Application, ApplicationBuilder, CommandHandler, CallbackQueryHandler, ContextTypes, PollHandler)
 
 # Importing admin and shop handlers
 from admin.panel import admin_panel_conv_handler
@@ -47,7 +48,6 @@ def webhook_handler(token):
     except Exception as e:
         logger.exception(f"Error processing webhook: {e}")
         return "Internal Server Error", 500
-
 
 # --- Check Membership Function ---
 async def check_membership(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -129,67 +129,78 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     except Exception as e:
         logger.exception(f"Error in start handler: {e}")
 
-# --- Referral System Handler ---
-async def referral_system_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    """Handles the 'Referral System' button."""
-    logger.debug("Entering referral_system_handler")
+# --- Help Command Handler ---
+async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """Handles the /help command."""
+    logger.debug("Entering help handler")
     try:
-        await update.callback_query.message.edit_text("Referral System is currently under development.")
-    except Exception as e:
-        logger.exception(f"Error in referral_system_handler: {e}")
-
-# --- Deposit Handler ---
-async def deposit_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    """Handles the 'Deposit' button."""
-    logger.debug("Entering deposit_handler")
-    try:
-        with open('qr_code.png', 'rb') as qr_code_file:
-            await context.bot.send_photo(
-                chat_id=update.effective_chat.id,
-                photo=qr_code_file,
-                caption="Pay this QR (PayTM) and click Paid to proceed.\nOr contact our admin for top-up."
-            )
-
-        keyboard = [
-            [
-                InlineKeyboardButton("Paid", callback_data='paid'),
-                InlineKeyboardButton("Admin", url='https://t.me/Sayyed_Kashifali')
-            ]
-        ]
-        reply_markup = InlineKeyboardMarkup(keyboard)
-        await update.callback_query.message.reply_text(
-            "If you have paid, send us a screenshot.\n\nNote:\nSending fake proofs will result in a permanent ban.",
-            reply_markup=reply_markup
+        await update.message.reply_text(
+            "Here are the available commands:\n"
+            "/start - Start the bot\n"
+            "/help - Get help\n"
+            "/settings - Manage your settings\n"
+            "/quiz - Start a quiz\n"
+            "/weather - Get the current weather\n"
         )
     except Exception as e:
-        logger.exception(f"Error in deposit_handler: {e}")
+        logger.exception(f"Error in help handler: {e}")
 
-# --- Free Shop Handler ---
-async def free_shop_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    """Handles the 'Free Shop' button."""
-    logger.debug("Entering free_shop_handler")
+# --- Settings Command Handler ---
+async def settings(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """Handles the /settings command."""
+    logger.debug("Entering settings handler")
     try:
-        await update.callback_query.message.edit_text("Welcome to the Free Shop!")
+        await update.message.reply_text("Settings are currently under development.")
     except Exception as e:
-        logger.exception(f"Error in free_shop_handler: {e}")
+        logger.exception(f"Error in settings handler: {e}")
 
-# --- Paid Shop Handler ---
-async def paid_shop_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    """Handles the 'Paid Shop' button."""
-    logger.debug("Entering paid_shop_handler")
+# --- Quiz Command Handler ---
+async def quiz(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """Handles the /quiz command."""
+    logger.debug("Entering quiz handler")
     try:
-        await update.callback_query.message.edit_text("Welcome to the Paid Shop!")
+        question = "What is the capital of France?"
+        options = ["Berlin", "Madrid", "Paris", "Rome"]
+        await context.bot.send_poll(
+            chat_id=update.effective_chat.id,
+            question=question,
+            options=options,
+            is_anonymous=False,
+            type=Poll.QUIZ,
+            correct_option_id=2
+        )
     except Exception as e:
-        logger.exception(f"Error in paid_shop_handler: {e}")
+        logger.exception(f"Error in quiz handler: {e}")
 
-# --- Admin Panel Handler ---
-async def admin_panel_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    """Handles the 'Admin Panel' button."""
-    logger.debug("Entering admin_panel_handler")
+# --- Weather Command Handler ---
+async def weather(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """Handles the /weather command."""
+    logger.debug("Entering weather handler")
     try:
-        await admin_panel_conv_handler.process_update(update, context)
+        location = "London"
+        api_key = "your_openweather_api_key"
+        weather_url = f"http://api.openweathermap.org/data/2.5/weather?q={location}&appid={api_key}"
+        async with context.bot.session.get(weather_url) as response:
+            weather_data = await response.json()
+            if weather_data["cod"] != 200:
+                await update.message.reply_text("Error getting weather data.")
+            else:
+                weather_desc = weather_data["weather"][0]["description"]
+                temp = weather_data["main"]["temp"]
+                await update.message.reply_text(f"The weather in {location} is {weather_desc} with a temperature of {temp}K.")
     except Exception as e:
-        logger.exception(f"Error in admin_panel_handler: {e}")
+        logger.exception(f"Error in weather handler: {e}")
+
+# --- Poll Answer Handler ---
+async def receive_poll_answer(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """Handles poll answers."""
+    logger.debug("Entering poll answer handler")
+    try:
+        poll_id = update.poll_answer.poll_id
+        selected_option = update.poll_answer.option_ids[0]
+        logger.info(f"Poll {poll_id} answered with option {selected_option}.")
+    except Exception as e:
+        logger.exception(f"Error in poll answer handler: {e}")
 
 # --- Setup Dispatcher ---
 def setup_dispatcher():
@@ -201,6 +212,13 @@ def setup_dispatcher():
 
     # Add command handlers
     application.add_handler(CommandHandler("start", check_membership))
+    application.add_handler(CommandHandler("help", help_command))
+    application.add_handler(CommandHandler("settings", settings))
+    application.add_handler(CommandHandler("quiz", quiz))
+    application.add_handler(CommandHandler("weather", weather))
+    application.add_handler(PollHandler(receive_poll_answer))
+
+    # Add callback query handlers
     application.add_handler(CallbackQueryHandler(admin_panel_handler, pattern="^admin$"))
     application.add_handler(CallbackQueryHandler(free_shop_handler, pattern="^free_shop$"))
     application.add_handler(CallbackQueryHandler(paid_shop_handler, pattern="^paid_shop$"))
@@ -225,7 +243,7 @@ async def set_webhook(application):
     else:
         logger.error("WEBHOOK_URL not set in environment variables.")
 
-# --- Initialize App ---
+# --- Initialize Application ---
 if __name__ == "__main__":
     application = setup_dispatcher()
     asyncio.run(set_webhook(application))
