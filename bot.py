@@ -213,23 +213,22 @@ def setup_dispatcher():
     return application
 
 # --- Set Webhook ---
-def set_webhook(application):
+async def set_webhook(application):
     """Sets the Telegram webhook."""
-    webhook_url = f"curl -F "url=https://final-hester-notcrazyhuman-94126448.koyeb.app/" https://api.telegram.org/bot8085073135:AAEpv0Vt56MPYpYAVmyjwmwUvGBcUFIzs6E/setWebhook"
+    webhook_url = "https://final-hester-notcrazyhuman-94126448.koyeb.app/"
     if webhook_url:
-        success = application.bot.set_webhook(webhook_url)
+        success = await application.bot.set_webhook(webhook_url)
         if success:
             logger.info(f"Webhook set to {webhook_url}")
         else:
             logger.error("Failed to set webhook")
     else:
-        logger.error("Webhook URL not set properly.")
+        logger.error("WEBHOOK_URL not set in environment variables.")
 
-# --- Initialize Application ---
+# --- Initialize App ---
 if __name__ == "__main__":
     application = setup_dispatcher()
-    set_webhook(application)
-
+    asyncio.run(set_webhook(application))
     # Run Flask app
     port = int(os.environ.get('PORT', 8080))
     app.run(host='0.0.0.0', port=port)
