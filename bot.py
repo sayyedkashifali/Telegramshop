@@ -2,7 +2,7 @@ import os
 import logging
 import random
 from datetime import datetime
-from flask import Flask
+from flask import Flask, request, jsonify
 from telegram import (ChatMember, InlineKeyboardButton, InlineKeyboardMarkup, Update)
 from telegram.ext import (Application, ApplicationBuilder, CommandHandler, CallbackQueryHandler, ContextTypes)
 
@@ -33,6 +33,20 @@ logger = logging.getLogger(__name__)
 def index():
     """Test route to ensure server is running."""
     return "Hello from Sir! Kashif's Bot is running!"
+
+# --- Webhook Route ---
+@app.route('/webhook', methods=['POST'])
+def webhook():
+    """Route to handle incoming webhook requests."""
+    try:
+        # Process the webhook payload here
+        data = request.get_json()
+        logger.debug(f"Webhook data received: {data}")
+        # Add your webhook processing logic here
+        return jsonify({"status": "success"}), 200
+    except Exception as e:
+        logger.exception("Error processing webhook")
+        return jsonify({"status": "error", "message": str(e)}), 500
 
 # --- Check Membership Function ---
 async def check_membership(update: Update, context: ContextTypes.DEFAULT_TYPE):
