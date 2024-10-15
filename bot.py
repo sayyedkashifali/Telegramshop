@@ -212,7 +212,7 @@ def setup_dispatcher():
 # --- Set Webhook ---
 def set_webhook():
     """Sets the Telegram webhook."""
-    webhook_url = os.environ.get("WEBHOOK_URL")  # e.g., https://your-koyeb-app.koyeb.app/webhook/<token>
+    webhook_url = os.environ.get("https://final-hester-notcrazyhuman-94126448.koyeb.app/webhook/8085073135:AAEpv0Vt56MPYpYAVmyjwmwUvGBcUFIzs6E")  # e.g., https://your-koyeb-app.koyeb.app/webhook/<token>
     if webhook_url:
         success = application.bot.set_webhook(webhook_url)
         if success:
