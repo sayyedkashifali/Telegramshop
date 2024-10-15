@@ -4,7 +4,7 @@ import random
 from datetime import datetime
 from flask import Flask, request, jsonify, abort
 from telegram import (ChatMember, InlineKeyboardButton, InlineKeyboardMarkup, Update)
-from telegram.ext import (Application, ApplicationBuilder, CommandHandler, CallbackQueryHandler, ContextTypes, Dispatcher)
+from telegram.ext import (Application, ApplicationBuilder, CommandHandler, CallbackQueryHandler, ContextTypes)
 
 # Importing admin and shop handlers
 from admin.panel import admin_panel_conv_handler
@@ -28,8 +28,8 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-# Create dispatcher
-dispatcher = Dispatcher()
+# Initialize application
+application = ApplicationBuilder().token(TOKEN).build()
 
 # --- Test Route ---
 @app.route('/')
@@ -46,8 +46,8 @@ def webhook_handler(token):
         abort(403)
 
     try:
-        update = Update.de_json(request.get_json(force=True), bot=dispatcher.bot)
-        dispatcher.process_update(update)
+        update = Update.de_json(request.get_json(force=True), bot=application.bot)
+        application.update_queue.put(update)
         return "OK", 200
     except Exception as e:
         logger.exception(f"Error processing webhook: {e}")
@@ -198,29 +198,23 @@ async def admin_panel_handler(update: Update, context: ContextTypes.DEFAULT_TYPE
 # --- Setup Dispatcher ---
 def setup_dispatcher():
     """Sets up the Telegram dispatcher with handlers."""
-    from telegram import Bot
-
-    bot = Bot(token=TOKEN)
-    dispatcher.bot = bot
-
     # Add handlers
-    dispatcher.add_handler(CommandHandler("start", check_membership))
-    dispatcher.add_handler(CallbackQueryHandler(admin_panel_handler, pattern="^admin$"))
-    dispatcher.add_handler(CallbackQueryHandler(free_shop_handler, pattern="^free_shop$"))
-    dispatcher.add_handler(CallbackQueryHandler(paid_shop_handler, pattern="^paid_shop$"))
-    dispatcher.add_handler(CallbackQueryHandler(referral_system_handler, pattern="^referral$"))
-    dispatcher.add_handler(CallbackQueryHandler(deposit_handler, pattern="^deposit$"))
+    application.add_handler(CommandHandler("start", check_membership))
+    application.add_handler(CallbackQueryHandler(admin_panel_handler, pattern="^admin$"))
+    application.add_handler(CallbackQueryHandler(free_shop_handler, pattern="^free_shop$"))
+    application.add_handler(CallbackQueryHandler(paid_shop_handler, pattern="^paid_shop$"))
+    application.add_handler(CallbackQueryHandler(referral_system_handler, pattern="^referral$"))
+    application.add_handler(CallbackQueryHandler(deposit_handler, pattern="^deposit$"))
 
     # Add admin conversation handler
-    dispatcher.add_handler(admin_panel_conv_handler)
+    application.add_handler(admin_panel_conv_handler)
 
 # --- Set Webhook ---
 def set_webhook():
     """Sets the Telegram webhook."""
-    webhook_url = os.environ.get("https://final-hester-notcrazyhuman-94126448.koyeb.app/webhook")   # e.g., https://your-koyeb-app.koyeb.app/webhook/<token>
-    bot = dispatcher.bot
+    webhook_url = os.environ.get("WEBHOOK_URL")   # e.g., https://your-koyeb-app.koyeb.app/webhook/<token>
     if webhook_url:
-        success = bot.set_webhook(webhook_url)
+        success = application.bot.set_webhook(webhook_url)
         if success:
             logger.info(f"Webhook set to {webhook_url}")
         else:
