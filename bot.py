@@ -4,7 +4,7 @@ import random
 from datetime import datetime
 from flask import Flask, request, jsonify, abort
 from telegram import (ChatMember, InlineKeyboardButton, InlineKeyboardMarkup, Update)
-from telegram.ext import (Application, ApplicationBuilder, CommandHandler, CallbackQueryHandler, ContextTypes)
+from telegram.ext import (Application, ApplicationBuilder, CommandHandler, CallbackQueryHandler, ContextTypes, Dispatcher)
 
 # Importing admin and shop handlers
 from admin.panel import admin_panel_conv_handler
@@ -27,6 +27,9 @@ logging.basicConfig(
     level=logging.DEBUG  # DEBUG level for detailed logs
 )
 logger = logging.getLogger(__name__)
+
+# Create dispatcher
+dispatcher = Dispatcher()
 
 # --- Test Route ---
 @app.route('/')
@@ -214,7 +217,7 @@ def setup_dispatcher():
 # --- Set Webhook ---
 def set_webhook():
     """Sets the Telegram webhook."""
-    webhook_url = os.environ.get("WEBHOOK_URL")   # e.g., https://your-koyeb-app.koyeb.app/webhook/<token>
+    webhook_url = os.environ.get("https://api.telegram.org/bot8085073135:AAEpv0Vt56MPYpYAVmyjwmwUvGBcUFIzs6E/setWebhook?url=https://final-hester-notcrazyhuman-94126448.koyeb.app/webhook")   # e.g., https://your-koyeb-app.koyeb.app/webhook/<token>
     bot = dispatcher.bot
     if webhook_url:
         success = bot.set_webhook(webhook_url)
