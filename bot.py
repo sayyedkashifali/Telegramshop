@@ -100,7 +100,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         user = update.effective_user
         current_hour = datetime.now().hour
         greeting = (
-            "Good evening 🌃" if current_hour >= 18 else 
+            "Good evening 🌃" if current_hour >= 18 else
             ("Good afternoon ☀️" if current_hour >= 12 else "Good morning 🌞")
         )
 
@@ -212,7 +212,7 @@ def setup_dispatcher():
 # --- Set Webhook ---
 def set_webhook():
     """Sets the Telegram webhook."""
-    webhook_url = os.environ.get("https://eoc94fq6ah6cxu4.m.pipedream.net")   # e.g., https://your-koyeb-app.koyeb.app/webhook/<token>
+    webhook_url = os.environ.get("https://final-hester-notcrazyhuman-94126448.koyeb.app/webhook")  # e.g., https://your-koyeb-app.koyeb.app/webhook/<token>
     if webhook_url:
         success = application.bot.set_webhook(webhook_url)
         if success:
