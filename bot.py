@@ -34,6 +34,8 @@ logger = logging.getLogger(__name__)
 # --- Flask App ---
 app = Flask(__name__)
 
+# Initialize application
+application = ApplicationBuilder().token(TOKEN).build()
 
 # --- Your Flask routes ---
 @app.route('/')
@@ -46,7 +48,7 @@ def webhook():
     if request.method == 'GET':
         return "Webhook is running!", 200
     elif request.method == 'POST':
-        update = Update.de_json(request.get_json(force=True), bot)
+        update = Update.de_json(request.get_json(force=True), application.bot)
         # Process the update
         asyncio.run(application.process_update(update))
         return "Update processed!", 200
@@ -244,15 +246,12 @@ def setup_dispatcher():
 # --- Set Webhook ---
 async def set_webhook():
     """Sets the Telegram webhook."""
-    webhook_url = os.environ.get("https://api.telegram.org/bot8085073135:AAEpv0Vt56MPYpYAVmyjwmwUvGBcUFIzs6E/setWebhook?url=https://final-hester-notcrazyhuman-94126448.koyeb.app/webhook")  # e.g., https://your-koyeb-app.koyeb.app/webhook/<token>
-    if webhook_url:
-        success = await application.bot.set_webhook(webhook_url)
-        if success:
-            logger.info(f"Webhook set to {webhook_url}")
-        else:
-            logger.error("Failed to set webhook")
+    webhook_url = "WEBHOOK_URL"
+    success = await application.bot.set_webhook(webhook_url)
+    if success:
+        logger.info(f"Webhook set to {webhook_url}")
     else:
-        logger.error("WEBHOOK_URL not set in environment variables.")
+        logger.error("Failed to set webhook")
 
 # --- Initialize App ---
 if __name__ == "__main__":
