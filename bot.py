@@ -1,13 +1,20 @@
-import os
+import asyncio
 import logging
+import os
 import random
 from datetime import datetime
-from flask import Flask, request, jsonify, abort
-from telegram import (ChatMember, InlineKeyboardButton, InlineKeyboardMarkup, Update)
-from telegram.ext import (Application, ApplicationBuilder, CommandHandler, CallbackQueryHandler, ContextTypes)
 
-# Importing admin and shop handlers
-from admin.panel import admin_panel_conv_handler
+from flask import Flask, request
+from telegram import (ChatMember, InlineKeyboardButton, InlineKeyboardMarkup,
+                      Update)
+from telegram.ext import (Application, ApplicationBuilder,
+                          CallbackQueryHandler, CommandHandler,
+                          ContextTypes, MessageHandler, filters)
+
+# Import the admin panel and admin user IDs
+from admin.panel import ADMIN_USER_IDS, admin_panel_conv_handler
+
+# Import shop handlers
 from free_shop import free_shop_handler
 from paid_shop import paid_shop_handler
 
@@ -15,61 +22,61 @@ from paid_shop import paid_shop_handler
 TOKEN = os.environ.get("BOT_TOKEN")
 
 # --- Other settings ---
-REQUIRED_CHANNEL = "@igdealsbykashif"
-LOG_CHANNEL_ID = "-1002429063387"
-
-# --- Flask App ---
-app = Flask(__name__)
+REQUIRED_CHANNEL = "@igdealsbykashif"  # Your channel username
+LOG_CHANNEL_ID = "-1002429063387"  # Your log channel ID
 
 # Configure logging
 logging.basicConfig(
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-    level=logging.DEBUG  # DEBUG level for detailed logs
-)
+    level=logging.DEBUG)  # Set to DEBUG for more detailed logs
 logger = logging.getLogger(__name__)
 
-# Initialize application
-application = ApplicationBuilder().token(TOKEN).build()
+# --- Flask App ---
+app = Flask(__name__)
 
-# --- Test Route ---
+
+# --- Your Flask routes ---
 @app.route('/')
 def index():
-    """Test route to ensure server is running."""
-    return "Hello from Sir! Kashif's Bot is running!"
+    return "Hello from Flask!"
 
-# --- Webhook Route ---
-@app.route('/webhook/<token>', methods=['POST'])
-def webhook_handler(token):
-    """Handles incoming webhook updates from Telegram."""
-    if token != TOKEN:
-        logger.warning("Invalid webhook token")
-        abort(403)
 
-    try:
-        update = Update.de_json(request.get_json(force=True), bot=application.bot)
-        application.update_queue.put(update)
-        return "OK", 200
-    except Exception as e:
-        logger.exception(f"Error processing webhook: {e}")
-        return "Internal Server Error", 500
+@app.route('/webhook', methods=['GET', 'POST'])
+def webhook():
+    if request.method == 'GET':
+        return "Webhook is running!", 200
+    elif request.method == 'POST':
+        update = Update.de_json(request.get_json(force=True), bot)
+        # Process the update
+        asyncio.run(application.process_update(update))
+        return "Update processed!", 200
 
-# --- Check Membership Function ---
-async def check_membership(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """Check if the user is a member of the required channel."""
+
+# --- Check Membership ---
+async def check_membership(update: Update,
+                            context: ContextTypes.DEFAULT_TYPE):
+    """Checks if the user has joined the required channel."""
     logger.debug("Entering check_membership handler")
     try:
         user = update.effective_user
-        chat_member = await context.bot.get_chat_member(chat_id=REQUIRED_CHANNEL, user_id=user.id)
+        chat_member = await context.bot.get_chat_member(
+            chat_id=REQUIRED_CHANNEL, user_id=user.id)
 
-        if chat_member.status in [ChatMember.MEMBER, ChatMember.CREATOR, ChatMember.ADMINISTRATOR]:
+        if chat_member.status in [
+                ChatMember.MEMBER, ChatMember.CREATOR,
+                ChatMember.ADMINISTRATOR
+        ]:
+            # User is a member, proceed with the bot's functionality
             logger.debug("User is a member")
-            await start(update, context)
+            await start(
+                update, context)  # Call the start function here
         else:
+            # User is not a member, send a message asking them to join
             join_link = f"https://t.me/{REQUIRED_CHANNEL.removeprefix('@')}"
             keyboard = InlineKeyboardMarkup.from_button(
-                InlineKeyboardButton("Join Channel", url=join_link)
-            )
+                InlineKeyboardButton("Join Channel", url=join_link))
 
+            # List of image URLs
             images = [
                 "https://files.catbox.moe/z131hg.jpg",
                 "https://files.catbox.moe/i0cepb.jpg",
@@ -78,38 +85,42 @@ async def check_membership(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 "https://files.catbox.moe/m92opv.jpg",
                 "https://files.catbox.moe/dt641v.jpg"
             ]
+            # Choose a random image from the list
             random_image = random.choice(images)
 
             await update.message.reply_photo(
                 photo=random_image,
-                caption=(
-                    f"👋 Hey {user.mention_html()}!\n\nTo use this bot, you need to join our channel first. "
-                    "Click the button below to join and then press /start to begin using the bot."
-                ),
+                caption=
+                f"👋 Hey {user.mention_html()}!\n\nTo use this bot, you need to join our channel first. Click the button below to join and then press /start to start using the bot.",
                 reply_markup=keyboard,
-                parse_mode="HTML"
-            )
+                parse_mode="HTML")
     except Exception as e:
-        logger.exception(f"Error in check_membership: {e}")
+        logger.exception(f"An error occurred in check_membership: {e}")
 
-# --- Start Command Handler ---
+
+# --- Start Function ---
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Handles the /start command."""
     logger.debug("Entering start handler")
     try:
         user = update.effective_user
         current_hour = datetime.now().hour
-        greeting = (
-            "Good evening 🌃" if current_hour >= 18 else
-            ("Good afternoon ☀️" if current_hour >= 12 else "Good morning 🌞")
-        )
+        greeting = ""
+
+        if 5 <= current_hour < 12:
+            greeting = "Good morning 🌞"
+        elif 12 <= current_hour < 18:
+            greeting = "Good afternoon ☀️"
+        else:
+            greeting = "Good evening 🌃"
 
         message = f"""
         {greeting} Hey! {user.mention_html()}
 
-        Welcome to **Flexer Premium Shop** - Your one-stop shop for exclusive deals and premium products.
+        This is **Flexer Premium Shop**, an advanced selling bot designed to provide you with a seamless and secure shopping experience. 
 
-        Explore a wide selection of items, manage your orders, and track purchases with ease. We prioritize your satisfaction and a seamless shopping experience.
+        Explore our wide selection of products, easily manage your orders, and track your purchases with just a few taps. 
+        We are committed to providing you with the best possible service and ensuring your satisfaction. 
 
         Happy shopping! 😊
         """
@@ -121,7 +132,8 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
             ],
             [
                 InlineKeyboardButton("Paid Shop", callback_data='paid_shop'),
-                InlineKeyboardButton("Referral System", callback_data='referral')
+                InlineKeyboardButton("Referral System",
+                                     callback_data='referral')
             ],
             [
                 InlineKeyboardButton("Admin Panel", callback_data='admin'),
@@ -129,31 +141,77 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
             ]
         ]
         reply_markup = InlineKeyboardMarkup(keyboard)
-        await update.message.reply_text(message, reply_markup=reply_markup, parse_mode="HTML")
+        await update.message.reply_text(message,
+                                        reply_markup=reply_markup,
+                                        parse_mode="HTML")
     except Exception as e:
-        logger.exception(f"Error in start handler: {e}")
+        logger.exception(f"An error occurred in start: {e}")
 
-# --- Referral System Handler ---
-async def referral_system_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    """Handles the 'Referral System' button."""
-    logger.debug("Entering referral_system_handler")
+
+# --- Button Handlers ---
+async def profile_handler(update: Update,
+                          context: ContextTypes.DEFAULT_TYPE) -> None:
+    """Handles the 'Profile' button."""
+    logger.debug("Entering profile_handler")
     try:
-        await update.callback_query.message.edit_text("Referral System is currently under development.")
-    except Exception as e:
-        logger.exception(f"Error in referral_system_handler: {e}")
+        user_id = update.effective_user.id
+        # Implement logic to fetch user details from the database
+        # For now, using placeholder data
+        username = "test_user"
+        transaction_count = 5
+        referral_count = 2
 
-# --- Deposit Handler ---
-async def deposit_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+        message = f"""
+        *User ID:* {user_id}
+        *Username:* {username}
+        *Transactions:* {transaction_count}
+        *Referrals:* {referral_count}
+        """
+        await update.callback_query.message.edit_text(text=message,
+                                                      parse_mode='Markdown')
+    except Exception as e:
+        logger.exception(f"An error occurred in profile_handler: {e}")
+
+
+async def referral_handler(update: Update,
+                           context: ContextTypes.DEFAULT_TYPE) -> None:
+    """Handles the 'Referral System' button."""
+    logger.debug("Entering referral_handler")
+    try:
+        user_id = update.effective_user.id
+        referral_link = f"https://t.me/your_bot?start={user_id}"  # Replace with your actual bot username
+        message = f"Share this link to invite others: {referral_link}"
+        await update.callback_query.message.edit_text(text=message)
+    except Exception as e:
+        logger.exception(f"An error occurred in referral_handler: {e}")
+
+
+async def admin_panel_handler(update: Update,
+                              context: ContextTypes.DEFAULT_TYPE) -> None:
+    """Handles the 'Admin Panel' button."""
+    logger.debug("Entering admin_panel_handler")
+    try:
+        await admin_panel_conv_handler(
+            update, context)  # Using the correct variable name
+    except Exception as e:
+        logger.exception(f"An error occurred in admin_panel_handler: {e}")
+
+
+async def deposit_handler(update: Update,
+                          context: ContextTypes.DEFAULT_TYPE) -> None:
     """Handles the 'Deposit' button."""
     logger.debug("Entering deposit_handler")
     try:
+        # Replace 'qr_code.png' with the actual path to your QR code image
         with open('qr_code.png', 'rb') as qr_code_file:
             await context.bot.send_photo(
                 chat_id=update.effective_chat.id,
                 photo=qr_code_file,
-                caption="Pay this QR (PayTM) and click Paid to proceed.\nOr contact our admin for top-up."
+                caption=
+                "Pay This QR (PayTM) and click Paid button to Go to the Next step.\nOr\nYou Can 📞 contact Our Admin And top up Your account."
             )
 
+        # Create the "Paid" and "Admin" buttons
         keyboard = [
             [
                 InlineKeyboardButton("Paid", callback_data='paid'),
@@ -166,34 +224,8 @@ async def deposit_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
             reply_markup=reply_markup
         )
     except Exception as e:
-        logger.exception(f"Error in deposit_handler: {e}")
+        logger.exception(f"An error occurred in deposit_handler: {e}")
 
-# --- Free Shop Handler ---
-async def free_shop_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    """Handles the 'Free Shop' button."""
-    logger.debug("Entering free_shop_handler")
-    try:
-        await update.callback_query.message.edit_text("Welcome to the Free Shop!")
-    except Exception as e:
-        logger.exception(f"Error in free_shop_handler: {e}")
-
-# --- Paid Shop Handler ---
-async def paid_shop_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    """Handles the 'Paid Shop' button."""
-    logger.debug("Entering paid_shop_handler")
-    try:
-        await update.callback_query.message.edit_text("Welcome to the Paid Shop!")
-    except Exception as e:
-        logger.exception(f"Error in paid_shop_handler: {e}")
-
-# --- Admin Panel Handler ---
-async def admin_panel_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    """Handles the 'Admin Panel' button."""
-    logger.debug("Entering admin_panel_handler")
-    try:
-        await admin_panel_conv_handler.process_update(update, context)
-    except Exception as e:
-        logger.exception(f"Error in admin_panel_handler: {e}")
 
 # --- Setup Dispatcher ---
 def setup_dispatcher():
@@ -212,7 +244,7 @@ def setup_dispatcher():
 # --- Set Webhook ---
 async def set_webhook():
     """Sets the Telegram webhook."""
-    webhook_url = os.environ.get("WEBHOOK_URL")  # e.g., https://your-koyeb-app.koyeb.app/webhook/<token>
+    webhook_url = os.environ.get("https://api.telegram.org/bot8085073135:AAEpv0Vt56MPYpYAVmyjwmwUvGBcUFIzs6E/setWebhook?url=https://final-hester-notcrazyhuman-94126448.koyeb.app/webhook")  # e.g., https://your-koyeb-app.koyeb.app/webhook/<token>
     if webhook_url:
         success = await application.bot.set_webhook(webhook_url)
         if success:
