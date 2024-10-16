@@ -210,11 +210,11 @@ def setup_dispatcher():
     application.add_handler(admin_panel_conv_handler)
 
 # --- Set Webhook ---
-def set_webhook():
+async def set_webhook():
     """Sets the Telegram webhook."""
     webhook_url = os.environ.get("WEBHOOK_URL")  # e.g., https://your-koyeb-app.koyeb.app/webhook/<token>
     if webhook_url:
-        success = application.bot.set_webhook(webhook_url)
+        success = await application.bot.set_webhook(webhook_url)
         if success:
             logger.info(f"Webhook set to {webhook_url}")
         else:
@@ -225,7 +225,8 @@ def set_webhook():
 # --- Initialize App ---
 if __name__ == "__main__":
     setup_dispatcher()
-    set_webhook()
+    import asyncio
+    asyncio.run(set_webhook())
     # Run Flask app
     port = int(os.environ.get('PORT', 8080))
     app.run(host='0.0.0.0', port=port)
