@@ -36,7 +36,12 @@ app = Flask(__name__)
 
 # Initialize application
 application = ApplicationBuilder().token(TOKEN).build()
-application.initialize()  # Ensure the application is initialized
+
+async def initialize_application():
+    await application.initialize()  # Properly await the coroutine
+
+# Run the initialization
+asyncio.run(initialize_application())
 
 # --- Your Flask routes ---
 @app.route('/')
