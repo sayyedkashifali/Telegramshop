@@ -237,7 +237,7 @@ def setup_dispatcher():
     application.add_handler(CallbackQueryHandler(admin_panel_handler, pattern="^admin$"))
     application.add_handler(CallbackQueryHandler(free_shop_handler, pattern="^free_shop$"))
     application.add_handler(CallbackQueryHandler(paid_shop_handler, pattern="^paid_shop$"))
-    application.add_handler(CallbackQueryHandler(referral_system_handler, pattern="^referral$"))
+    application.add_handler(CallbackQueryHandler(referral_handler, pattern="^referral$"))  # Use referral_handler here
     application.add_handler(CallbackQueryHandler(deposit_handler, pattern="^deposit$"))
 
     # Add admin conversation handler
@@ -246,7 +246,7 @@ def setup_dispatcher():
 # --- Set Webhook ---
 async def set_webhook():
     """Sets the Telegram webhook."""
-    webhook_url = "WEBHOOK_URL"
+    webhook_url = "https://final-hester-notcrazyhuman-94126448.koyeb.app/webhook"
     success = await application.bot.set_webhook(webhook_url)
     if success:
         logger.info(f"Webhook set to {webhook_url}")
