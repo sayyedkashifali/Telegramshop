@@ -36,6 +36,7 @@ app = Flask(__name__)
 
 # Initialize application
 application = ApplicationBuilder().token(TOKEN).build()
+application.initialize()  # Ensure the application is initialized
 
 # --- Your Flask routes ---
 @app.route('/')
