@@ -1,4 +1,3 @@
-#Sir kashif 
 import asyncio
 import logging
 import os
@@ -41,8 +40,21 @@ application = ApplicationBuilder().token(TOKEN).build()
 async def initialize_application():
     await application.initialize()  # Properly await the coroutine
 
+async def set_webhook():
+    """Sets the Telegram webhook."""
+    webhook_url = "https://final-hester-notcrazyhuman-94126448.koyeb.app/webhook"
+    success = await application.bot.set_webhook(webhook_url)
+    if success:
+        logger.info(f"Webhook set to {webhook_url}")
+    else:
+        logger.error("Failed to set webhook")
+
 # Run the initialization
-asyncio.run(initialize_application())
+async def main():
+    await initialize_application()
+    await set_webhook()
+
+asyncio.run(main())
 
 # --- Your Flask routes ---
 @app.route('/')
@@ -235,21 +247,8 @@ def setup_dispatcher():
     # Add admin conversation handler
     application.add_handler(admin_panel_conv_handler)
 
-# --- Set Webhook ---
-async def set_webhook():
-    """Sets the Telegram webhook."""
-    webhook_url = "https://final-hester-notcrazyhuman-94126448.koyeb.app/webhook"
-    success = await application.bot.set_webhook(webhook_url)
-    if success:
-        logger.info(f"Webhook set to {webhook_url}")
-    else:
-        logger.error("Failed to set webhook")
-
 # --- Initialize App ---
 if __name__ == "__main__":
     setup_dispatcher()
-    import asyncio
-    asyncio.run(set_webhook())
-    # Run Flask app
     port = int(os.environ.get('PORT', 8080))
     app.run(host='0.0.0.0', port=port)
