@@ -66,8 +66,8 @@ def webhook():
         return "Webhook is running!", 200
     elif request.method == 'POST':
         update = Update.de_json(request.get_json(force=True), application.bot)
-        # Process the update asynchronously
-        asyncio.create_task(application.process_update(update))
+        # Use asyncio.run to call application.process_update(update) synchronously
+        asyncio.run(application.process_update(update))
         return "Update processed!", 200
 
 # --- Check Membership ---
