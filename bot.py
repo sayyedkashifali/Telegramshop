@@ -1,17 +1,12 @@
-import asyncio
 import logging
 import os
 import random
 from datetime import datetime
+from telegram import ChatMember, InlineKeyboardButton, InlineKeyboardMarkup, Update
+from telegram.ext import Application, ApplicationBuilder, CallbackQueryHandler, CommandHandler, ContextTypes
 
-from telegram import (ChatMember, InlineKeyboardButton, InlineKeyboardMarkup, Update)
-from telegram.ext import (Application, ApplicationBuilder, CallbackQueryHandler, CommandHandler,
-                          ContextTypes, MessageHandler, filters)
-
-# Import the admin panel and admin user IDs
+# Import your shop handlers and admin panel handler
 from admin.panel import ADMIN_USER_IDS, admin_panel_conv_handler
-
-# Import shop handlers
 from free_shop import free_shop_handler
 from paid_shop import paid_shop_handler
 
@@ -42,9 +37,7 @@ async def check_membership(update: Update, context: ContextTypes.DEFAULT_TYPE):
             chat_id=REQUIRED_CHANNEL, user_id=user.id
         )
 
-        if chat_member.status in [
-            ChatMember.MEMBER, ChatMember.CREATOR, ChatMember.ADMINISTRATOR
-        ]:
+        if chat_member.status in [ChatMember.MEMBER, ChatMember.CREATOR, ChatMember.ADMINISTRATOR]:
             # User is a member, proceed with the bot's functionality
             logger.debug("User is a member")
             await start(update, context)
@@ -203,7 +196,7 @@ def setup_dispatcher():
     # Add admin conversation handler
     application.add_handler(admin_panel_conv_handler)
 
-# --- Initialize App ---
+# --- Initialize Bot ---
 if __name__ == "__main__":
     setup_dispatcher()
-    application.run_polling()  # Run polling to check for updates
+    application.run_polling()
