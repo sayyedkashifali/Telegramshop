@@ -4,7 +4,6 @@ import os
 import random
 from datetime import datetime
 
-from flask import Flask, request
 from telegram import (ChatMember, InlineKeyboardButton, InlineKeyboardMarkup, Update)
 from telegram.ext import (Application, ApplicationBuilder, CallbackQueryHandler, CommandHandler,
                           ContextTypes, MessageHandler, filters)
@@ -30,45 +29,8 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-# --- Flask App ---
-app = Flask(__name__)
-
 # Initialize application
 application = ApplicationBuilder().token(TOKEN).build()
-
-async def initialize_application():
-    await application.initialize()  # Properly await the coroutine
-
-async def set_webhook():
-    """Sets the Telegram webhook."""
-    webhook_url = "https://final-hester-notcrazyhuman-94126448.koyeb.app/webhook"
-    success = await application.bot.set_webhook(webhook_url)
-    if success:
-        logger.info(f"Webhook set to {webhook_url}")
-    else:
-        logger.error("Failed to set webhook")
-
-# Run the initialization
-async def main():
-    await initialize_application()
-    await set_webhook()
-
-asyncio.run(main())
-
-# --- Your Flask routes ---
-@app.route('/')
-def index():
-    return "Hello from Flask!"
-
-@app.route('/webhook', methods=['GET', 'POST'])
-def webhook():
-    if request.method == 'GET':
-        return "Webhook is running!", 200
-    elif request.method == 'POST':
-        update = Update.de_json(request.get_json(force=True), application.bot)
-        # Use asyncio.run to call application.process_update(update) synchronously
-        asyncio.run(application.process_update(update))
-        return "Update processed!", 200
 
 # --- Check Membership ---
 async def check_membership(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -244,5 +206,4 @@ def setup_dispatcher():
 # --- Initialize App ---
 if __name__ == "__main__":
     setup_dispatcher()
-    port = int(os.environ.get('PORT', 8080))
-    app.run(host='0.0.0.0', port=port)
+    application.run_polling()  # Run polling to check for updates
